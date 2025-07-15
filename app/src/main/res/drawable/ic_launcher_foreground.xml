@@ -1,0 +1,64 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Main leaf shape -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M54,20c-12,0 -22,5 -28,13c-6,8 -8,18 -8,25c0,20 15,35 28,40c6,2.5 8,2.5 8,2.5s2,0 8,-2.5c13,-5 28,-20 28,-40c0,-7 -2,-17 -8,-25c-6,-8 -16,-13 -28,-13z" />
+    
+    <!-- Leaf highlight -->
+    <path
+        android:fillColor="#66BB6A"
+        android:pathData="M54,25c-9,0 -17,4 -22,10c-5,6 -6,14 -6,20c0,16 12,28 22,32c3,2 6,2 6,2s3,0 6,-2c10,-4 22,-16 22,-32c0,-6 -1,-14 -6,-20c-5,-6 -13,-10 -22,-10z" />
+    
+    <!-- Central vein -->
+    <path
+        android:fillColor="#2E7D32"
+        android:pathData="M54,30L54,85"
+        android:strokeWidth="3"
+        android:strokeColor="#2E7D32" />
+    
+    <!-- Side veins -->
+    <path
+        android:fillColor="#2E7D32"
+        android:pathData="M54,40c-8,3 -12,8 -15,12M54,40c8,3 12,8 15,12M54,50c-6,3 -10,6 -12,10M54,50c6,3 10,6 12,10M54,60c-5,3 -8,5 -10,8M54,60c5,3 8,5 10,8M54,70c-4,2 -6,4 -8,6M54,70c4,2 6,4 8,6"
+        android:strokeWidth="2"
+        android:strokeColor="#2E7D32" />
+    
+    <!-- Nutrition symbols -->
+    <path
+        android:fillColor="#FFC107"
+        android:pathData="M42,50m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0" />
+    <path
+        android:fillColor="#FF9800"
+        android:pathData="M66,55m-2.5,0a2.5,2.5 0,1 1,5 0a2.5,2.5 0,1 1,-5 0" />
+    <path
+        android:fillColor="#8BC34A"
+        android:pathData="M48,70m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0" />
+    <path
+        android:fillColor="#E91E63"
+        android:pathData="M60,75m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0" />
+    
+    <!-- Small nutrient dots -->
+    <path
+        android:fillColor="#E8F5E8"
+        android:pathData="M38,45m-1.5,0a1.5,1.5 0,1 1,3 0a1.5,1.5 0,1 1,-3 0" />
+    <path
+        android:fillColor="#E8F5E8"
+        android:pathData="M70,48m-1.2,0a1.2,1.2 0,1 1,2.4 0a1.2,1.2 0,1 1,-2.4 0" />
+    <path
+        android:fillColor="#E8F5E8"
+        android:pathData="M44,60m-1.3,0a1.3,1.3 0,1 1,2.6 0a1.3,1.3 0,1 1,-2.6 0" />
+    <path
+        android:fillColor="#E8F5E8"
+        android:pathData="M64,65m-1,0a1,1 0,1 1,2 0a1,1 0,1 1,-2 0" />
+    <path
+        android:fillColor="#E8F5E8"
+        android:pathData="M50,80m-1.2,0a1.2,1.2 0,1 1,2.4 0a1.2,1.2 0,1 1,-2.4 0" />
+    <path
+        android:fillColor="#E8F5E8"
+        android:pathData="M58,82m-0.8,0a0.8,0.8 0,1 1,1.6 0a0.8,0.8 0,1 1,-1.6 0" />
+</vector>

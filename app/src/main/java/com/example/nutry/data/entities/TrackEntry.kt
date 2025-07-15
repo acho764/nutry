@@ -1,0 +1,32 @@
+package com.example.nutry.data.entities
+
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.PrimaryKey
+import java.util.Date
+
+@Entity(
+    tableName = "track_entries",
+    foreignKeys = [
+        ForeignKey(
+            entity = Dish::class,
+            parentColumns = ["id"],
+            childColumns = ["dishId"],
+            onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = Ingredient::class,
+            parentColumns = ["id"],
+            childColumns = ["ingredientId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ]
+)
+data class TrackEntry(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val dishId: Int? = null,
+    val ingredientId: Int? = null,
+    val consumedAt: Date,
+    val quantity: Double = 1.0
+)

@@ -1,0 +1,39 @@
+package com.example.nutry.data.dao
+
+import androidx.room.*
+import com.example.nutry.data.entities.TrackEntry
+import kotlinx.coroutines.flow.Flow
+import java.util.Date
+
+@Dao
+interface TrackDao {
+    @Query("SELECT * FROM track_entries ORDER BY consumedAt DESC")
+    fun getAllTrackEntries(): Flow<List<TrackEntry>>
+
+    @Query("SELECT * FROM track_entries WHERE id = :id")
+    suspend fun getTrackEntryById(id: Int): TrackEntry?
+
+    @Query("SELECT * FROM track_entries WHERE dishId = :dishId ORDER BY consumedAt DESC")
+    suspend fun getTrackEntriesByDish(dishId: Int): List<TrackEntry>
+
+    @Query("SELECT * FROM track_entries WHERE ingredientId = :ingredientId ORDER BY consumedAt DESC")
+    suspend fun getTrackEntriesByIngredient(ingredientId: Int): List<TrackEntry>
+
+    @Query("SELECT * FROM track_entries WHERE dishId = :dishId AND consumedAt >= :fromDate ORDER BY consumedAt DESC LIMIT 1")
+    suspend fun getLastDishConsumption(dishId: Int, fromDate: Date): TrackEntry?
+
+    @Query("SELECT * FROM track_entries WHERE ingredientId = :ingredientId AND consumedAt >= :fromDate ORDER BY consumedAt DESC LIMIT 1")
+    suspend fun getLastIngredientConsumption(ingredientId: Int, fromDate: Date): TrackEntry?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTrackEntry(trackEntry: TrackEntry): Long
+
+    @Update
+    suspend fun updateTrackEntry(trackEntry: TrackEntry)
+
+    @Delete
+    suspend fun deleteTrackEntry(trackEntry: TrackEntry)
+
+    @Query("DELETE FROM track_entries WHERE id = :id")
+    suspend fun deleteTrackEntryById(id: Int)
+}
