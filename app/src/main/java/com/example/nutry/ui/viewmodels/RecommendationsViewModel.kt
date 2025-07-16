@@ -27,8 +27,7 @@ data class RecommendationItem(
 
 enum class RecommendationType {
     DISH_BASED,
-    INGREDIENT_BASED,
-    DISH_FROM_INGREDIENTS
+    INGREDIENT_BASED
 }
 
 class RecommendationsViewModel(
@@ -84,10 +83,7 @@ class RecommendationsViewModel(
                     calculateDishBasedRecommendations(dishes, trackEntries, settings)
                 }
                 RecommendationType.INGREDIENT_BASED -> {
-                    calculateIngredientBasedRecommendations(ingredients, trackEntries, settings)
-                }
-                RecommendationType.DISH_FROM_INGREDIENTS -> {
-                    calculateDishFromIngredientsRecommendations(dishes, ingredients, trackEntries, settings)
+                    calculateIngredientBasedRecommendations(dishes, ingredients, trackEntries, settings)
                 }
             }
         } catch (e: Exception) {
@@ -116,23 +112,6 @@ class RecommendationsViewModel(
     }
     
     private suspend fun calculateIngredientBasedRecommendations(
-        ingredients: List<Ingredient>,
-        trackEntries: List<TrackEntry>,
-        settings: Settings
-    ): List<RecommendationItem> {
-        return ingredients.map { ingredient ->
-            val freshnessScore = FreshnessCalculator.calculateIngredientFreshness(
-                ingredient, trackEntries, settings.ingredientBasedTimewindow
-            )
-            RecommendationItem(
-                ingredient = ingredient,
-                freshnessScore = freshnessScore,
-                type = RecommendationType.INGREDIENT_BASED
-            )
-        }.sortedByDescending { it.freshnessScore }
-    }
-    
-    private suspend fun calculateDishFromIngredientsRecommendations(
         dishes: List<Dish>,
         ingredients: List<Ingredient>,
         trackEntries: List<TrackEntry>,
@@ -146,7 +125,7 @@ class RecommendationsViewModel(
             RecommendationItem(
                 dish = dish,
                 freshnessScore = freshnessScore,
-                type = RecommendationType.DISH_FROM_INGREDIENTS
+                type = RecommendationType.INGREDIENT_BASED
             )
         }.sortedByDescending { it.freshnessScore }
     }

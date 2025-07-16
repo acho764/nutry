@@ -37,7 +37,7 @@ fun RecommendationItemCard(
                 ) {
                     when (recommendation.type) {
                         RecommendationType.DISH_BASED,
-                        RecommendationType.DISH_FROM_INGREDIENTS -> {
+                        RecommendationType.INGREDIENT_BASED -> {
                             recommendation.dish?.let { dish ->
                                 Text(
                                     text = dish.emoji,
@@ -46,15 +46,6 @@ fun RecommendationItemCard(
                                 )
                                 Text(
                                     text = dish.name,
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                        }
-                        RecommendationType.INGREDIENT_BASED -> {
-                            recommendation.ingredient?.let { ingredient ->
-                                Text(
-                                    text = ingredient.name,
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.Medium
                                 )
@@ -96,7 +87,6 @@ private fun getRecommendationTypeText(type: RecommendationType): String {
     return when (type) {
         RecommendationType.DISH_BASED -> "Dish-based"
         RecommendationType.INGREDIENT_BASED -> "Ingredient-based"
-        RecommendationType.DISH_FROM_INGREDIENTS -> "Ingredients average"
     }
 }
 

@@ -103,29 +103,7 @@ fun RecommendationsScreen() {
                     onClick = null
                 )
                 Text(
-                    text = "Ingredient-based (individual ingredients)",
-                    fontSize = 14.sp,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
-            
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .selectable(
-                        selected = recommendationMode == RecommendationType.DISH_FROM_INGREDIENTS,
-                        onClick = { viewModel.setRecommendationMode(RecommendationType.DISH_FROM_INGREDIENTS) },
-                        role = Role.RadioButton
-                    )
-                    .padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                RadioButton(
-                    selected = recommendationMode == RecommendationType.DISH_FROM_INGREDIENTS,
-                    onClick = null
-                )
-                Text(
-                    text = "Dishes from ingredients (average ingredient freshness)",
+                    text = "Ingredient-based (average freshness of dish ingredients)",
                     fontSize = 14.sp,
                     modifier = Modifier.padding(start = 8.dp)
                 )
