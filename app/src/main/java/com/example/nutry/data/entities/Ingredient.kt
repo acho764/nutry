@@ -3,6 +3,7 @@ package com.example.nutry.data.entities
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import java.util.Date
 
 @Entity(
     tableName = "ingredients",
@@ -20,5 +21,6 @@ data class Ingredient(
     val id: Int = 0,
     val name: String,
     val categoryId: Int,
-    val emoji: String = ""
+    val emoji: String = "",
+    val lastEaten: Date? = null
 )

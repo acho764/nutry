@@ -31,6 +31,8 @@ import com.example.nutry.ui.viewmodels.TrackViewModel
 import com.example.nutry.ui.viewmodels.TrackViewModelFactory
 import com.example.nutry.ui.viewmodels.DishViewModel
 import com.example.nutry.ui.viewmodels.DishViewModelFactory
+import com.example.nutry.ui.viewmodels.SettingsViewModel
+import com.example.nutry.ui.viewmodels.SettingsViewModelFactory
 import com.example.nutry.utils.FreshnessCalculator
 import java.util.Date
 
@@ -51,12 +53,14 @@ fun IngredientsScreen() {
     val dishViewModel: DishViewModel = viewModel(
         factory = DishViewModelFactory(application.dishRepository)
     )
+    val settingsViewModel: SettingsViewModel = viewModel(
+        factory = SettingsViewModelFactory(application.settingsRepository)
+    )
     
     val categories by categoryViewModel.categories.collectAsState()
     val ingredients by ingredientViewModel.ingredients.collectAsState()
     val dishes by dishViewModel.dishes.collectAsState()
-    val trackEntries by trackViewModel.trackEntries.collectAsState()
-    val allDishIngredients by dishViewModel.allDishIngredients.collectAsState()
+    val settings by settingsViewModel.settings.collectAsState()
     val isLoading by categoryViewModel.isLoading.collectAsState()
     val error by categoryViewModel.error.collectAsState()
     
@@ -139,7 +143,7 @@ fun IngredientsScreen() {
                 val categoryIngredients = ingredients.filter { it.categoryId == category.id }
                 items(categoryIngredients) { ingredient ->
                     val freshnessScore = FreshnessCalculator.calculateIngredientFreshness(
-                        ingredient, trackEntries, 7, allDishIngredients // Default timewindow
+                        ingredient, settings?.ingredientBasedTimewindow ?: 7
                     )
                     IngredientItem(
                         ingredient = ingredient,

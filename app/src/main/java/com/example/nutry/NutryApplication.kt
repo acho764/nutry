@@ -18,6 +18,6 @@ class NutryApplication : Application() {
     val categoryRepository by lazy { CategoryRepository(database.categoryDao()) }
     val ingredientRepository by lazy { IngredientRepository(database.ingredientDao()) }
     val dishRepository by lazy { DishRepository(database.dishDao()) }
-    val trackRepository by lazy { TrackRepository(database.trackDao()) }
+    val trackRepository by lazy { TrackRepository(database.trackDao(), database.ingredientDao(), database.dishDao()) }
     val settingsRepository by lazy { SettingsRepository(database.settingsDao()) }
 }

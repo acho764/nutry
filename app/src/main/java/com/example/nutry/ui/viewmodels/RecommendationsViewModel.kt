@@ -59,8 +59,9 @@ class RecommendationsViewModel(
                 dishRepository.getAllDishes(),
                 ingredientRepository.getAllIngredients(),
                 trackRepository.getAllTrackEntries(),
-                settingsRepository.getSettings()
-            ) { dishes, ingredients, trackEntries, settings ->
+                settingsRepository.getSettings(),
+                _recommendationMode
+            ) { dishes, ingredients, trackEntries, settings, mode ->
                 calculateRecommendations(dishes, ingredients, trackEntries, settings ?: Settings())
             }.collect { recommendations ->
                 _recommendations.value = recommendations
@@ -120,7 +121,7 @@ class RecommendationsViewModel(
         return dishes.map { dish ->
             val dishIngredients = dishRepository.getIngredientsByDish(dish.id)
             val freshnessScore = FreshnessCalculator.calculateDishFreshnessFromIngredients(
-                dish, dishIngredients, trackEntries, settings.ingredientBasedTimewindow
+                dish, dishIngredients, settings.ingredientBasedTimewindow
             )
             RecommendationItem(
                 dish = dish,
@@ -132,8 +133,7 @@ class RecommendationsViewModel(
     
     fun setRecommendationMode(mode: RecommendationType) {
         _recommendationMode.value = mode
-        // Trigger recalculation
-        observeDataAndCalculateRecommendations()
+        // Recalculation happens automatically via the combine flow
     }
     
     fun clearError() {

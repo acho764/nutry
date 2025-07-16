@@ -129,9 +129,11 @@ fun SettingsScreen() {
                             value = ingredientTimewindow,
                             onValueChange = { newValue ->
                                 ingredientTimewindow = newValue
-                                // Auto-save on change
+                            },
+                            onValueChangeFinished = {
+                                // Auto-save when slider drag finishes
                                 val newSettings = settings.copy(
-                                    ingredientBasedTimewindow = newValue.toInt()
+                                    ingredientBasedTimewindow = ingredientTimewindow.toInt()
                                 )
                                 viewModel.updateSettings(newSettings)
                             },
@@ -192,9 +194,11 @@ fun SettingsScreen() {
                             value = dishTimewindow,
                             onValueChange = { newValue ->
                                 dishTimewindow = newValue
-                                // Auto-save on change
+                            },
+                            onValueChangeFinished = {
+                                // Auto-save when slider drag finishes
                                 val newSettings = settings.copy(
-                                    dishBasedTimewindow = newValue.toInt()
+                                    dishBasedTimewindow = dishTimewindow.toInt()
                                 )
                                 viewModel.updateSettings(newSettings)
                             },

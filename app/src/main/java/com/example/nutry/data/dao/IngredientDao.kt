@@ -3,6 +3,7 @@ package com.example.nutry.data.dao
 import androidx.room.*
 import com.example.nutry.data.entities.Ingredient
 import kotlinx.coroutines.flow.Flow
+import java.util.Date
 
 @Dao
 interface IngredientDao {
@@ -37,4 +38,7 @@ interface IngredientDao {
         ORDER BY i.name ASC
     """)
     fun getAllIngredientsWithCategory(): Flow<List<com.example.nutry.data.entities.IngredientWithCategory>>
+    
+    @Query("UPDATE ingredients SET lastEaten = :lastEaten WHERE id = :ingredientId")
+    suspend fun updateIngredientLastEaten(ingredientId: Int, lastEaten: Date)
 }

@@ -55,4 +55,7 @@ interface DishDao {
         WHERE di.dishId = :dishId
     """)
     suspend fun getIngredientsWithCategoryByDish(dishId: Int): List<com.example.nutry.data.entities.IngredientWithCategory>
+    
+    @Query("SELECT ingredientId FROM dish_ingredients WHERE dishId = :dishId")
+    suspend fun getIngredientIdsByDish(dishId: Int): List<Int>
 }

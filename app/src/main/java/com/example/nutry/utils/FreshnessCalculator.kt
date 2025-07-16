@@ -3,64 +3,33 @@ package com.example.nutry.utils
 import com.example.nutry.data.entities.Dish
 import com.example.nutry.data.entities.Ingredient
 import com.example.nutry.data.entities.TrackEntry
-import java.util.Calendar
 import java.util.Date
-import java.util.concurrent.TimeUnit
 
 object FreshnessCalculator {
     
     /**
-     * Calculate freshness score for an ingredient based on its consumption history
+     * Calculate freshness score for an ingredient based on its lastEaten field
      * @param ingredient The ingredient to calculate freshness for
-     * @param trackEntries List of track entries for this ingredient
      * @param ingredientBasedTimewindow Number of days for 100% freshness
      * @return Freshness score as percentage (0-100)
      */
     fun calculateIngredientFreshness(
         ingredient: Ingredient,
-        trackEntries: List<TrackEntry>,
-        ingredientBasedTimewindow: Int,
-        dishIngredientRelationships: List<com.example.nutry.data.entities.DishIngredient> = emptyList()
+        ingredientBasedTimewindow: Int
     ): Int {
-        val now = Date()
-        val timewindowInMillis = ingredientBasedTimewindow * 24 * 60 * 60 * 1000L
-        val cutoffDate = Date(now.time - timewindowInMillis)
+        val lastEaten = ingredient.lastEaten
         
-        // Filter track entries for this ingredient within the timewindow
-        val directIngredientEntries = trackEntries.filter { entry ->
-            entry.ingredientId == ingredient.id && entry.consumedAt.after(cutoffDate)
-        }
-        
-        // Also consider dish consumption that contains this ingredient
-        val dishesContainingIngredient = dishIngredientRelationships.filter { 
-            it.ingredientId == ingredient.id 
-        }.map { it.dishId }
-        
-        val dishConsumptionEntries = trackEntries.filter { entry ->
-            entry.dishId != null && 
-            dishesContainingIngredient.contains(entry.dishId) && 
-            entry.consumedAt.after(cutoffDate)
-        }
-        
-        val recentEntries = directIngredientEntries + dishConsumptionEntries
-        
-        if (recentEntries.isEmpty()) {
-            // No consumption in the timewindow = 100% fresh
+        if (lastEaten == null) {
+            // Never consumed = 100% fresh
             return 100
         }
         
-        // Find the most recent consumption
-        val mostRecentEntry = recentEntries.maxByOrNull { it.consumedAt }
-        
-        return if (mostRecentEntry != null) {
-            calculateFreshnessFromLastConsumption(mostRecentEntry.consumedAt, now, ingredientBasedTimewindow)
-        } else {
-            100
-        }
+        val now = Date()
+        return calculateFreshnessFromLastConsumption(lastEaten, now, ingredientBasedTimewindow)
     }
     
     /**
-     * Calculate freshness score for a dish based on dish consumption history
+     * Calculate freshness score for a dish based on track consumption
      * @param dish The dish to calculate freshness for
      * @param trackEntries List of track entries for this dish
      * @param dishBasedTimewindow Number of days for 100% freshness
@@ -71,51 +40,39 @@ object FreshnessCalculator {
         trackEntries: List<TrackEntry>,
         dishBasedTimewindow: Int
     ): Int {
-        val now = Date()
-        val timewindowInMillis = dishBasedTimewindow * 24 * 60 * 60 * 1000L
-        val cutoffDate = Date(now.time - timewindowInMillis)
+        // Find the most recent consumption of this dish
+        val mostRecentEntry = trackEntries
+            .filter { it.dishId == dish.id }
+            .maxByOrNull { it.consumedAt }
         
-        // Filter track entries for this dish within the timewindow
-        val recentEntries = trackEntries.filter { entry ->
-            entry.dishId == dish.id && entry.consumedAt.after(cutoffDate)
-        }
-        
-        if (recentEntries.isEmpty()) {
-            // No consumption in the timewindow = 100% fresh
+        if (mostRecentEntry == null) {
+            // Never consumed = 100% fresh
             return 100
         }
         
-        // Find the most recent consumption
-        val mostRecentEntry = recentEntries.maxByOrNull { it.consumedAt }
-        
-        return if (mostRecentEntry != null) {
-            calculateFreshnessFromLastConsumption(mostRecentEntry.consumedAt, now, dishBasedTimewindow)
-        } else {
-            100
-        }
+        val now = Date()
+        return calculateFreshnessFromLastConsumption(mostRecentEntry.consumedAt, now, dishBasedTimewindow)
     }
     
     /**
      * Calculate freshness score for a dish based on its ingredients' freshness
      * @param dish The dish to calculate freshness for
      * @param dishIngredients List of ingredients in this dish
-     * @param allTrackEntries All track entries for ingredient lookups
      * @param ingredientBasedTimewindow Number of days for 100% freshness for ingredients
      * @return Freshness score as percentage (0-100)
      */
     fun calculateDishFreshnessFromIngredients(
         dish: Dish,
         dishIngredients: List<Ingredient>,
-        allTrackEntries: List<TrackEntry>,
         ingredientBasedTimewindow: Int
     ): Int {
         if (dishIngredients.isEmpty()) {
             return 100
         }
         
-        // Calculate freshness for each ingredient
+        // Calculate freshness for each ingredient using simplified method
         val ingredientFreshnesses = dishIngredients.map { ingredient ->
-            calculateIngredientFreshness(ingredient, allTrackEntries, ingredientBasedTimewindow, emptyList())
+            calculateIngredientFreshness(ingredient, ingredientBasedTimewindow)
         }
         
         // Return average freshness of all ingredients

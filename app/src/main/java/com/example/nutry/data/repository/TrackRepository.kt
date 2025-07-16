@@ -1,11 +1,17 @@
 package com.example.nutry.data.repository
 
 import com.example.nutry.data.dao.TrackDao
+import com.example.nutry.data.dao.IngredientDao
+import com.example.nutry.data.dao.DishDao
 import com.example.nutry.data.entities.TrackEntry
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 
-class TrackRepository(private val trackDao: TrackDao) {
+class TrackRepository(
+    private val trackDao: TrackDao,
+    private val ingredientDao: IngredientDao,
+    private val dishDao: DishDao
+) {
     
     fun getAllTrackEntries(): Flow<List<TrackEntry>> = trackDao.getAllTrackEntries()
     
@@ -23,8 +29,23 @@ class TrackRepository(private val trackDao: TrackDao) {
     suspend fun getLastIngredientConsumption(ingredientId: Int, fromDate: Date): TrackEntry? = 
         trackDao.getLastIngredientConsumption(ingredientId, fromDate)
     
-    suspend fun insertTrackEntry(trackEntry: TrackEntry): Long = 
-        trackDao.insertTrackEntry(trackEntry)
+    suspend fun insertTrackEntry(trackEntry: TrackEntry): Long {
+        val id = trackDao.insertTrackEntry(trackEntry)
+        
+        // Update lastEaten for ingredients
+        if (trackEntry.ingredientId != null) {
+            // Direct ingredient consumption
+            ingredientDao.updateIngredientLastEaten(trackEntry.ingredientId!!, trackEntry.consumedAt)
+        } else if (trackEntry.dishId != null) {
+            // Dish consumption - update lastEaten for all ingredients in the dish
+            val ingredientIds = dishDao.getIngredientIdsByDish(trackEntry.dishId!!)
+            ingredientIds.forEach { ingredientId ->
+                ingredientDao.updateIngredientLastEaten(ingredientId, trackEntry.consumedAt)
+            }
+        }
+        
+        return id
+    }
     
     suspend fun updateTrackEntry(trackEntry: TrackEntry) = trackDao.updateTrackEntry(trackEntry)
     
