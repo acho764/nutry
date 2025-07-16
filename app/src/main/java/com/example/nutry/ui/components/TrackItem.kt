@@ -60,6 +60,13 @@ fun TrackItem(
                             )
                         }
                         ingredient != null -> {
+                            if (ingredient.emoji.isNotBlank()) {
+                                Text(
+                                    text = ingredient.emoji,
+                                    fontSize = 20.sp,
+                                    modifier = Modifier.padding(end = 8.dp)
+                                )
+                            }
                             Text(
                                 text = ingredient.name,
                                 fontSize = 16.sp,

@@ -29,13 +29,13 @@ fun SettingsScreen() {
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
     
-    var ingredientTimewindow by remember { mutableStateOf("") }
-    var dishTimewindow by remember { mutableStateOf("") }
+    var ingredientTimewindow by remember { mutableStateOf(7f) }
+    var dishTimewindow by remember { mutableStateOf(14f) }
     
     // Update local state when settings change
     LaunchedEffect(settings) {
-        ingredientTimewindow = settings.ingredientBasedTimewindow.toString()
-        dishTimewindow = settings.dishBasedTimewindow.toString()
+        ingredientTimewindow = settings.ingredientBasedTimewindow.toFloat()
+        dishTimewindow = settings.dishBasedTimewindow.toFloat()
     }
     
     Column(
@@ -96,26 +96,48 @@ fun SettingsScreen() {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 
-                OutlinedTextField(
-                    value = ingredientTimewindow,
-                    onValueChange = { ingredientTimewindow = it },
-                    label = { Text("Ingredient-based timewindow (days)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                    supportingText = { 
-                        Text("Days until ingredients are considered fresh again")
-                    }
+                // Ingredient timewindow slider
+                Text(
+                    text = "Ingredient-based timewindow: ${ingredientTimewindow.toInt()} days",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
                 )
                 
-                OutlinedTextField(
+                Slider(
+                    value = ingredientTimewindow,
+                    onValueChange = { ingredientTimewindow = it },
+                    valueRange = 1f..30f,
+                    steps = 28,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                Text(
+                    text = "Days until ingredients are considered fresh again",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // Dish timewindow slider
+                Text(
+                    text = "Dish-based timewindow: ${dishTimewindow.toInt()} days",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                
+                Slider(
                     value = dishTimewindow,
                     onValueChange = { dishTimewindow = it },
-                    label = { Text("Dish-based timewindow (days)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                    supportingText = { 
-                        Text("Days until dishes are considered fresh again")
-                    }
+                    valueRange = 1f..30f,
+                    steps = 28,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                Text(
+                    text = "Days until dishes are considered fresh again",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 
                 Row(
@@ -124,17 +146,15 @@ fun SettingsScreen() {
                 ) {
                     Button(
                         onClick = {
-                            val ingredientDays = ingredientTimewindow.toIntOrNull() ?: 7
-                            val dishDays = dishTimewindow.toIntOrNull() ?: 14
+                            val ingredientDays = ingredientTimewindow.toInt()
+                            val dishDays = dishTimewindow.toInt()
                             
                             val newSettings = settings.copy(
                                 ingredientBasedTimewindow = ingredientDays,
                                 dishBasedTimewindow = dishDays
                             )
                             viewModel.updateSettings(newSettings)
-                        },
-                        enabled = ingredientTimewindow.toIntOrNull() != null && 
-                                dishTimewindow.toIntOrNull() != null
+                        }
                     ) {
                         Text("Save Settings")
                     }

@@ -197,6 +197,10 @@ fun IngredientsScreen() {
             onSave = { name, categoryId, emoji ->
                 ingredientViewModel.updateIngredient(ingredient.copy(name = name, categoryId = categoryId, emoji = emoji))
                 editingIngredient = null
+            },
+            onDelete = { ingredientToDelete ->
+                ingredientViewModel.deleteIngredient(ingredientToDelete)
+                editingIngredient = null
             }
         )
     }

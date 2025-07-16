@@ -150,7 +150,9 @@ fun TrackDialog(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         OutlinedTextField(
-                            value = selectedIngredient?.name ?: "Select Ingredient",
+                            value = selectedIngredient?.let { 
+                                if (it.emoji.isNotBlank()) "${it.emoji} ${it.name}" else it.name 
+                            } ?: "Select Ingredient",
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("Ingredient") },
@@ -166,7 +168,11 @@ fun TrackDialog(
                         ) {
                             ingredients.forEach { ingredient ->
                                 DropdownMenuItem(
-                                    text = { Text(ingredient.name) },
+                                    text = { 
+                                        Text(
+                                            if (ingredient.emoji.isNotBlank()) "${ingredient.emoji} ${ingredient.name}" else ingredient.name
+                                        ) 
+                                    },
                                     onClick = {
                                         selectedIngredientId = ingredient.id
                                         ingredientExpanded = false

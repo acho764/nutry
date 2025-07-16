@@ -21,12 +21,14 @@ fun IngredientDialog(
     ingredient: Ingredient? = null,
     categories: List<Category>,
     onDismiss: () -> Unit,
-    onSave: (String, Int, String) -> Unit
+    onSave: (String, Int, String) -> Unit,
+    onDelete: ((Ingredient) -> Unit)? = null
 ) {
     var name by remember { mutableStateOf(ingredient?.name ?: "") }
     var emoji by remember { mutableStateOf(ingredient?.emoji ?: "") }
     var selectedCategoryId by remember { mutableStateOf(ingredient?.categoryId ?: categories.firstOrNull()?.id ?: -1) }
     var expanded by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
     
     val selectedCategory = categories.find { it.id == selectedCategoryId }
     
@@ -95,24 +97,64 @@ fun IngredientDialog(
                 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    TextButton(onClick = onDismiss) {
-                        Text("Cancel")
+                    // Delete button (only show for existing ingredients)
+                    if (ingredient != null && onDelete != null) {
+                        Button(
+                            onClick = { showDeleteDialog = true },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error
+                            )
+                        ) {
+                            Text("Delete")
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.width(1.dp))
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(
-                        onClick = {
-                            if (name.isNotBlank() && selectedCategoryId > 0) {
-                                onSave(name, selectedCategoryId, emoji)
-                            }
-                        },
-                        enabled = name.isNotBlank() && selectedCategoryId > 0
-                    ) {
-                        Text("Save")
+                    
+                    Row {
+                        TextButton(onClick = onDismiss) {
+                            Text("Cancel")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = {
+                                if (name.isNotBlank() && selectedCategoryId > 0) {
+                                    onSave(name, selectedCategoryId, emoji)
+                                }
+                            },
+                            enabled = name.isNotBlank() && selectedCategoryId > 0
+                        ) {
+                            Text("Save")
+                        }
                     }
                 }
             }
         }
+    }
+    
+    if (showDeleteDialog && ingredient != null && onDelete != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Ingredient") },
+            text = { Text("Are you sure you want to delete \"${ingredient.name}\"? This will also remove it from all dishes and tracking records.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDelete(ingredient)
+                        showDeleteDialog = false
+                        onDismiss()
+                    }
+                ) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }

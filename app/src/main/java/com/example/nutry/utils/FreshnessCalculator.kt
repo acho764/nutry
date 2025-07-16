@@ -22,10 +22,8 @@ object FreshnessCalculator {
         ingredientBasedTimewindow: Int
     ): Int {
         val now = Date()
-        val cutoffDate = Calendar.getInstance().apply {
-            time = now
-            add(Calendar.DAY_OF_YEAR, -ingredientBasedTimewindow)
-        }.time
+        val timewindowInMillis = ingredientBasedTimewindow * 24 * 60 * 60 * 1000L
+        val cutoffDate = Date(now.time - timewindowInMillis)
         
         // Filter track entries for this ingredient within the timewindow
         val recentEntries = trackEntries.filter { entry ->
@@ -60,10 +58,8 @@ object FreshnessCalculator {
         dishBasedTimewindow: Int
     ): Int {
         val now = Date()
-        val cutoffDate = Calendar.getInstance().apply {
-            time = now
-            add(Calendar.DAY_OF_YEAR, -dishBasedTimewindow)
-        }.time
+        val timewindowInMillis = dishBasedTimewindow * 24 * 60 * 60 * 1000L
+        val cutoffDate = Date(now.time - timewindowInMillis)
         
         // Filter track entries for this dish within the timewindow
         val recentEntries = trackEntries.filter { entry ->
@@ -124,14 +120,16 @@ object FreshnessCalculator {
         now: Date,
         timewindow: Int
     ): Int {
-        val daysSinceConsumption = TimeUnit.MILLISECONDS.toDays(now.time - lastConsumption.time)
+        val millisSinceConsumption = now.time - lastConsumption.time
+        val timewindowInMillis = timewindow * 24 * 60 * 60 * 1000L // Convert days to milliseconds
         
         return when {
-            daysSinceConsumption >= timewindow -> 100 // Full freshness after timewindow
-            daysSinceConsumption <= 0 -> 0 // Just consumed = 0% fresh
+            millisSinceConsumption >= timewindowInMillis -> 100 // Full freshness after timewindow
+            millisSinceConsumption <= 0 -> 0 // Just consumed = 0% fresh
             else -> {
-                // Linear interpolation between 0% and 100%
-                ((daysSinceConsumption.toFloat() / timewindow) * 100).toInt()
+                // Linear interpolation between 0% and 100% using precise timestamps
+                val freshnessPercentage = (millisSinceConsumption.toDouble() / timewindowInMillis) * 100
+                freshnessPercentage.toInt().coerceIn(0, 100)
             }
         }
     }

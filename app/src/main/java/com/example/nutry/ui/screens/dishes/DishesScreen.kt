@@ -140,6 +140,10 @@ fun DishesScreen() {
             onSave = { name, emoji, ingredientIds ->
                 dishViewModel.updateDish(dish.copy(name = name, emoji = emoji), ingredientIds)
                 editingDish = null
+            },
+            onDelete = { dishToDelete ->
+                dishViewModel.deleteDish(dishToDelete)
+                editingDish = null
             }
         )
     }

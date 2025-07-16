@@ -27,7 +27,6 @@ fun IngredientItem(
     onEat: (Ingredient) -> Unit,
     onClick: (Ingredient) -> Unit
 ) {
-    var showDeleteDialog by remember { mutableStateOf(false) }
     
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -62,21 +61,12 @@ fun IngredientItem(
                     }
                 }
                 
-                Row {
-                    IconButton(onClick = { onEat(ingredient) }) {
-                        Icon(
-                            imageVector = Icons.Default.Restaurant,
-                            contentDescription = "Eat",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    IconButton(onClick = { showDeleteDialog = true }) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete",
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    }
+                IconButton(onClick = { onEat(ingredient) }) {
+                    Icon(
+                        imageVector = Icons.Default.Restaurant,
+                        contentDescription = "Eat",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
             
@@ -87,28 +77,5 @@ fun IngredientItem(
                 modifier = Modifier.fillMaxWidth()
             )
         }
-    }
-    
-    if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Ingredient") },
-            text = { Text("Are you sure you want to delete \"${ingredient.name}\"? This will also remove it from all dishes and tracking records.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDelete(ingredient)
-                        showDeleteDialog = false
-                    }
-                ) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
     }
 }

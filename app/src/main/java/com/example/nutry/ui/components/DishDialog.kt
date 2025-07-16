@@ -28,12 +28,14 @@ fun DishDialog(
     ingredients: List<IngredientWithCategory>,
     selectedIngredientIds: List<Int> = emptyList(),
     onDismiss: () -> Unit,
-    onSave: (String, String, List<Int>) -> Unit
+    onSave: (String, String, List<Int>) -> Unit,
+    onDelete: ((Dish) -> Unit)? = null
 ) {
     var name by remember { mutableStateOf(dish?.name ?: "") }
     var emoji by remember { mutableStateOf(dish?.emoji ?: "") }
     var selectedIds by remember { mutableStateOf(selectedIngredientIds.toSet()) }
     var searchQuery by remember { mutableStateOf("") }
+    var showDeleteDialog by remember { mutableStateOf(false) }
     
     // Filter ingredients based on search query
     val filteredIngredients = remember(ingredients, searchQuery) {
@@ -191,24 +193,64 @@ fun DishDialog(
                 // Bottom action buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    TextButton(onClick = onDismiss) {
-                        Text("Cancel")
+                    // Delete button (only show for existing dishes)
+                    if (dish != null && onDelete != null) {
+                        Button(
+                            onClick = { showDeleteDialog = true },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error
+                            )
+                        ) {
+                            Text("Delete")
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.width(1.dp))
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(
-                        onClick = {
-                            if (name.isNotBlank() && emoji.isNotBlank()) {
-                                onSave(name, emoji, selectedIds.toList())
-                            }
-                        },
-                        enabled = name.isNotBlank() && emoji.isNotBlank()
-                    ) {
-                        Text("Save")
+                    
+                    Row {
+                        TextButton(onClick = onDismiss) {
+                            Text("Cancel")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = {
+                                if (name.isNotBlank() && emoji.isNotBlank()) {
+                                    onSave(name, emoji, selectedIds.toList())
+                                }
+                            },
+                            enabled = name.isNotBlank() && emoji.isNotBlank()
+                        ) {
+                            Text("Save")
+                        }
                     }
                 }
             }
         }
+    }
+    
+    if (showDeleteDialog && dish != null && onDelete != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Dish") },
+            text = { Text("Are you sure you want to delete \"${dish.name}\"? This will also remove it from all tracking records.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDelete(dish)
+                        showDeleteDialog = false
+                        onDismiss()
+                    }
+                ) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
