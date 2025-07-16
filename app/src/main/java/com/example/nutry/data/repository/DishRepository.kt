@@ -4,6 +4,7 @@ import com.example.nutry.data.dao.DishDao
 import com.example.nutry.data.entities.Dish
 import com.example.nutry.data.entities.DishIngredient
 import com.example.nutry.data.entities.Ingredient
+import com.example.nutry.data.entities.IngredientWithCategory
 import kotlinx.coroutines.flow.Flow
 
 class DishRepository(private val dishDao: DishDao) {
@@ -33,4 +34,7 @@ class DishRepository(private val dishDao: DishDao) {
     
     suspend fun getIngredientsByDish(dishId: Int): List<Ingredient> = 
         dishDao.getIngredientsByDish(dishId)
+    
+    suspend fun getIngredientsWithCategoryByDish(dishId: Int): List<IngredientWithCategory> = 
+        dishDao.getIngredientsWithCategoryByDish(dishId)
 }

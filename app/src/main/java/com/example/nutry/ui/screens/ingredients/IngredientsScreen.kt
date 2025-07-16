@@ -17,14 +17,22 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nutry.NutryApplication
 import com.example.nutry.data.entities.Category
 import com.example.nutry.data.entities.Ingredient
+import com.example.nutry.data.entities.Dish
 import com.example.nutry.ui.components.CategoryDialog
 import com.example.nutry.ui.components.CategoryItem
 import com.example.nutry.ui.components.IngredientDialog
 import com.example.nutry.ui.components.IngredientItem
+import com.example.nutry.ui.components.TrackDialog
 import com.example.nutry.ui.viewmodels.CategoryViewModel
 import com.example.nutry.ui.viewmodels.CategoryViewModelFactory
 import com.example.nutry.ui.viewmodels.IngredientViewModel
 import com.example.nutry.ui.viewmodels.IngredientViewModelFactory
+import com.example.nutry.ui.viewmodels.TrackViewModel
+import com.example.nutry.ui.viewmodels.TrackViewModelFactory
+import com.example.nutry.ui.viewmodels.DishViewModel
+import com.example.nutry.ui.viewmodels.DishViewModelFactory
+import com.example.nutry.utils.FreshnessCalculator
+import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,16 +45,27 @@ fun IngredientsScreen() {
     val ingredientViewModel: IngredientViewModel = viewModel(
         factory = IngredientViewModelFactory(application.ingredientRepository)
     )
+    val trackViewModel: TrackViewModel = viewModel(
+        factory = TrackViewModelFactory(application.trackRepository)
+    )
+    val dishViewModel: DishViewModel = viewModel(
+        factory = DishViewModelFactory(application.dishRepository)
+    )
     
     val categories by categoryViewModel.categories.collectAsState()
     val ingredients by ingredientViewModel.ingredients.collectAsState()
+    val dishes by dishViewModel.dishes.collectAsState()
+    val trackEntries by trackViewModel.trackEntries.collectAsState()
     val isLoading by categoryViewModel.isLoading.collectAsState()
     val error by categoryViewModel.error.collectAsState()
     
     var showAddCategoryDialog by remember { mutableStateOf(false) }
     var showAddIngredientDialog by remember { mutableStateOf(false) }
+    var showAddChoiceDialog by remember { mutableStateOf(false) }
+    var showEatDialog by remember { mutableStateOf(false) }
     var editingCategory by remember { mutableStateOf<Category?>(null) }
     var editingIngredient by remember { mutableStateOf<Ingredient?>(null) }
+    var eatingIngredient by remember { mutableStateOf<Ingredient?>(null) }
     
     Column(
         modifier = Modifier
@@ -66,26 +85,14 @@ fun IngredientsScreen() {
                 fontWeight = FontWeight.Bold
             )
             
-            Row {
-                FloatingActionButton(
-                    onClick = { showAddIngredientDialog = true },
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add Ingredient"
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                FloatingActionButton(
-                    onClick = { showAddCategoryDialog = true },
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add Category"
-                    )
-                }
+            FloatingActionButton(
+                onClick = { showAddChoiceDialog = true },
+                modifier = Modifier.size(48.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add"
+                )
             }
         }
         
@@ -123,17 +130,27 @@ fun IngredientsScreen() {
                     CategoryItem(
                         category = category,
                         onEdit = { editingCategory = it },
-                        onDelete = { categoryViewModel.deleteCategory(it) }
+                        onDelete = { categoryViewModel.deleteCategory(it) },
+                        onClick = { editingCategory = it }
                     )
                 }
                 
                 val categoryIngredients = ingredients.filter { it.categoryId == category.id }
                 items(categoryIngredients) { ingredient ->
+                    val freshnessScore = FreshnessCalculator.calculateIngredientFreshness(
+                        ingredient, trackEntries, 7 // Default timewindow
+                    )
                     IngredientItem(
                         ingredient = ingredient,
                         category = category,
+                        freshnessScore = freshnessScore,
                         onEdit = { editingIngredient = it },
-                        onDelete = { ingredientViewModel.deleteIngredient(it) }
+                        onDelete = { ingredientViewModel.deleteIngredient(it) },
+                        onEat = { 
+                            eatingIngredient = it
+                            showEatDialog = true
+                        },
+                        onClick = { editingIngredient = it }
                     )
                 }
             }
@@ -154,8 +171,8 @@ fun IngredientsScreen() {
         IngredientDialog(
             categories = categories,
             onDismiss = { showAddIngredientDialog = false },
-            onSave = { name, categoryId ->
-                ingredientViewModel.insertIngredient(name, categoryId)
+            onSave = { name, categoryId, emoji ->
+                ingredientViewModel.insertIngredient(name, categoryId, emoji)
                 showAddIngredientDialog = false
             }
         )
@@ -177,10 +194,56 @@ fun IngredientsScreen() {
             ingredient = ingredient,
             categories = categories,
             onDismiss = { editingIngredient = null },
-            onSave = { name, categoryId ->
-                ingredientViewModel.updateIngredient(ingredient.copy(name = name, categoryId = categoryId))
+            onSave = { name, categoryId, emoji ->
+                ingredientViewModel.updateIngredient(ingredient.copy(name = name, categoryId = categoryId, emoji = emoji))
                 editingIngredient = null
             }
         )
+    }
+    
+    if (showAddChoiceDialog) {
+        AlertDialog(
+            onDismissRequest = { showAddChoiceDialog = false },
+            title = { Text("Add New Item") },
+            text = { Text("What would you like to add?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showAddChoiceDialog = false
+                        showAddIngredientDialog = true
+                    }
+                ) {
+                    Text("Add Ingredient")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showAddChoiceDialog = false
+                        showAddCategoryDialog = true
+                    }
+                ) {
+                    Text("Add Category")
+                }
+            }
+        )
+    }
+    
+    if (showEatDialog) {
+        eatingIngredient?.let { ingredient ->
+            TrackDialog(
+                dishes = dishes,
+                ingredients = ingredients,
+                onDismiss = { 
+                    showEatDialog = false
+                    eatingIngredient = null
+                },
+                onSave = { dishId, ingredientId, quantity, date ->
+                    trackViewModel.insertTrackEntry(null, ingredient.id, quantity)
+                    showEatDialog = false
+                    eatingIngredient = null
+                }
+            )
+        }
     }
 }

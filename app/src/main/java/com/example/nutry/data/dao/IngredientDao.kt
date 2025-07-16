@@ -26,4 +26,12 @@ interface IngredientDao {
 
     @Query("DELETE FROM ingredients WHERE id = :id")
     suspend fun deleteIngredientById(id: Int)
+    
+    @Query("""
+        SELECT i.id, i.name, i.categoryId, i.emoji, c.emoji as categoryEmoji 
+        FROM ingredients i 
+        INNER JOIN categories c ON i.categoryId = c.id 
+        ORDER BY i.name ASC
+    """)
+    fun getAllIngredientsWithCategory(): Flow<List<com.example.nutry.data.entities.IngredientWithCategory>>
 }

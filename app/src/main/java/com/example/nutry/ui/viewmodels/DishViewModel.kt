@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.nutry.data.entities.Dish
 import com.example.nutry.data.entities.DishIngredient
 import com.example.nutry.data.entities.Ingredient
+import com.example.nutry.data.entities.IngredientWithCategory
 import com.example.nutry.data.repository.DishRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,8 +18,8 @@ class DishViewModel(private val repository: DishRepository) : ViewModel() {
     private val _dishes = MutableStateFlow<List<Dish>>(emptyList())
     val dishes: StateFlow<List<Dish>> = _dishes.asStateFlow()
     
-    private val _dishIngredients = MutableStateFlow<Map<Int, List<Ingredient>>>(emptyMap())
-    val dishIngredients: StateFlow<Map<Int, List<Ingredient>>> = _dishIngredients.asStateFlow()
+    private val _dishIngredients = MutableStateFlow<Map<Int, List<IngredientWithCategory>>>(emptyMap())
+    val dishIngredients: StateFlow<Map<Int, List<IngredientWithCategory>>> = _dishIngredients.asStateFlow()
     
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -41,10 +42,10 @@ class DishViewModel(private val repository: DishRepository) : ViewModel() {
     
     private fun loadIngredientsForDishes(dishes: List<Dish>) {
         viewModelScope.launch {
-            val ingredientsMap = mutableMapOf<Int, List<Ingredient>>()
+            val ingredientsMap = mutableMapOf<Int, List<IngredientWithCategory>>()
             dishes.forEach { dish ->
                 try {
-                    val ingredients = repository.getIngredientsByDish(dish.id)
+                    val ingredients = repository.getIngredientsWithCategoryByDish(dish.id)
                     ingredientsMap[dish.id] = ingredients
                 } catch (e: Exception) {
                     // Handle individual dish ingredient loading errors
@@ -71,6 +72,9 @@ class DishViewModel(private val repository: DishRepository) : ViewModel() {
                     )
                     repository.insertDishIngredient(dishIngredient)
                 }
+                
+                // Refresh all dish ingredients to ensure UI is updated
+                loadIngredientsForDishes(_dishes.value)
             } catch (e: Exception) {
                 _error.value = "Error adding dish: ${e.message}"
             } finally {
@@ -96,6 +100,9 @@ class DishViewModel(private val repository: DishRepository) : ViewModel() {
                     )
                     repository.insertDishIngredient(dishIngredient)
                 }
+                
+                // Refresh all dish ingredients to ensure UI is updated
+                loadIngredientsForDishes(_dishes.value)
             } catch (e: Exception) {
                 _error.value = "Error updating dish: ${e.message}"
             } finally {

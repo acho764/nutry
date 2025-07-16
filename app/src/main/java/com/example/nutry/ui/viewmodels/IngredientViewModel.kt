@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.nutry.data.entities.Ingredient
+import com.example.nutry.data.entities.IngredientWithCategory
 import com.example.nutry.data.repository.IngredientRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,6 +16,9 @@ class IngredientViewModel(private val repository: IngredientRepository) : ViewMo
     private val _ingredients = MutableStateFlow<List<Ingredient>>(emptyList())
     val ingredients: StateFlow<List<Ingredient>> = _ingredients.asStateFlow()
     
+    private val _ingredientsWithCategory = MutableStateFlow<List<IngredientWithCategory>>(emptyList())
+    val ingredientsWithCategory: StateFlow<List<IngredientWithCategory>> = _ingredientsWithCategory.asStateFlow()
+    
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
     
@@ -23,12 +27,21 @@ class IngredientViewModel(private val repository: IngredientRepository) : ViewMo
     
     init {
         observeIngredients()
+        observeIngredientsWithCategory()
     }
     
     private fun observeIngredients() {
         viewModelScope.launch {
             repository.getAllIngredients().collect { ingredientList ->
                 _ingredients.value = ingredientList
+            }
+        }
+    }
+    
+    private fun observeIngredientsWithCategory() {
+        viewModelScope.launch {
+            repository.getAllIngredientsWithCategory().collect { ingredientList ->
+                _ingredientsWithCategory.value = ingredientList
             }
         }
     }
@@ -41,12 +54,12 @@ class IngredientViewModel(private val repository: IngredientRepository) : ViewMo
         }
     }
     
-    fun insertIngredient(name: String, categoryId: Int) {
+    fun insertIngredient(name: String, categoryId: Int, emoji: String = "") {
         viewModelScope.launch {
             try {
                 _isLoading.value = true
                 _error.value = null
-                val ingredient = Ingredient(name = name, categoryId = categoryId)
+                val ingredient = Ingredient(name = name, categoryId = categoryId, emoji = emoji)
                 repository.insertIngredient(ingredient)
             } catch (e: Exception) {
                 _error.value = "Error adding ingredient: ${e.message}"

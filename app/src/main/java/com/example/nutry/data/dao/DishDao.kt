@@ -43,4 +43,13 @@ interface DishDao {
         WHERE di.dishId = :dishId
     """)
     suspend fun getIngredientsByDish(dishId: Int): List<com.example.nutry.data.entities.Ingredient>
+    
+    @Query("""
+        SELECT i.id, i.name, i.categoryId, i.emoji, c.emoji as categoryEmoji 
+        FROM ingredients i 
+        INNER JOIN categories c ON i.categoryId = c.id
+        INNER JOIN dish_ingredients di ON i.id = di.ingredientId 
+        WHERE di.dishId = :dishId
+    """)
+    suspend fun getIngredientsWithCategoryByDish(dishId: Int): List<com.example.nutry.data.entities.IngredientWithCategory>
 }

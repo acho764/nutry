@@ -21,10 +21,11 @@ fun IngredientDialog(
     ingredient: Ingredient? = null,
     categories: List<Category>,
     onDismiss: () -> Unit,
-    onSave: (String, Int) -> Unit
+    onSave: (String, Int, String) -> Unit
 ) {
     var name by remember { mutableStateOf(ingredient?.name ?: "") }
-    var selectedCategoryId by remember { mutableStateOf(ingredient?.categoryId ?: categories.firstOrNull()?.id ?: 0) }
+    var emoji by remember { mutableStateOf(ingredient?.emoji ?: "") }
+    var selectedCategoryId by remember { mutableStateOf(ingredient?.categoryId ?: categories.firstOrNull()?.id ?: -1) }
     var expanded by remember { mutableStateOf(false) }
     
     val selectedCategory = categories.find { it.id == selectedCategoryId }
@@ -50,6 +51,13 @@ fun IngredientDialog(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text("Ingredient Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                OutlinedTextField(
+                    value = emoji,
+                    onValueChange = { emoji = it },
+                    label = { Text("Emoji") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
@@ -95,11 +103,11 @@ fun IngredientDialog(
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = {
-                            if (name.isNotBlank() && selectedCategoryId != 0) {
-                                onSave(name, selectedCategoryId)
+                            if (name.isNotBlank() && selectedCategoryId > 0) {
+                                onSave(name, selectedCategoryId, emoji)
                             }
                         },
-                        enabled = name.isNotBlank() && selectedCategoryId != 0
+                        enabled = name.isNotBlank() && selectedCategoryId > 0
                     ) {
                         Text("Save")
                     }

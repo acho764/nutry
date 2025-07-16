@@ -37,12 +37,17 @@ fun DishesScreen() {
     
     val dishes by dishViewModel.dishes.collectAsState()
     val dishIngredients by dishViewModel.dishIngredients.collectAsState()
-    val ingredients by ingredientViewModel.ingredients.collectAsState()
+    val ingredients by ingredientViewModel.ingredientsWithCategory.collectAsState()
     val isLoading by dishViewModel.isLoading.collectAsState()
     val error by dishViewModel.error.collectAsState()
     
     var showAddDialog by remember { mutableStateOf(false) }
     var editingDish by remember { mutableStateOf<Dish?>(null) }
+    
+    // Force refresh after operations
+    LaunchedEffect(dishes.size) {
+        // This will trigger when dishes list changes
+    }
     
     Column(
         modifier = Modifier

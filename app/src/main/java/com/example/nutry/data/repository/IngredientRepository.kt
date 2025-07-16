@@ -2,6 +2,7 @@ package com.example.nutry.data.repository
 
 import com.example.nutry.data.dao.IngredientDao
 import com.example.nutry.data.entities.Ingredient
+import com.example.nutry.data.entities.IngredientWithCategory
 import kotlinx.coroutines.flow.Flow
 
 class IngredientRepository(private val ingredientDao: IngredientDao) {
@@ -20,4 +21,7 @@ class IngredientRepository(private val ingredientDao: IngredientDao) {
     suspend fun deleteIngredient(ingredient: Ingredient) = ingredientDao.deleteIngredient(ingredient)
     
     suspend fun deleteIngredientById(id: Int) = ingredientDao.deleteIngredientById(id)
+    
+    fun getAllIngredientsWithCategory(): Flow<List<IngredientWithCategory>> = 
+        ingredientDao.getAllIngredientsWithCategory()
 }

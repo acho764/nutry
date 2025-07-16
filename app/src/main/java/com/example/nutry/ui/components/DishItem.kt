@@ -14,13 +14,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.nutry.data.entities.Dish
-import com.example.nutry.data.entities.Ingredient
+import com.example.nutry.data.entities.IngredientWithCategory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DishItem(
     dish: Dish,
-    ingredients: List<Ingredient>,
+    ingredients: List<IngredientWithCategory>,
     onEdit: (Dish) -> Unit,
     onDelete: (Dish) -> Unit
 ) {
@@ -92,11 +92,15 @@ fun DishItem(
                             ),
                             modifier = Modifier.padding(vertical = 2.dp)
                         ) {
-                            Text(
-                                text = ingredient.name,
-                                fontSize = 12.sp,
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                            )
+                            ) {
+                                Text(
+                                    text = if (ingredient.emoji.isNotBlank()) "${ingredient.emoji} ${ingredient.name}" else ingredient.name,
+                                    fontSize = 12.sp
+                                )
+                            }
                         }
                     }
                 }

@@ -1,9 +1,9 @@
 package com.example.nutry.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,7 +18,8 @@ import com.example.nutry.data.entities.Category
 fun CategoryItem(
     category: Category,
     onEdit: (Category) -> Unit,
-    onDelete: (Category) -> Unit
+    onDelete: (Category) -> Unit,
+    onClick: (Category) -> Unit
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     
@@ -29,12 +30,14 @@ fun CategoryItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable { onClick(category) }
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = category.emoji,
@@ -48,20 +51,12 @@ fun CategoryItem(
                 )
             }
             
-            Row {
-                IconButton(onClick = { onEdit(category) }) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit"
-                    )
-                }
-                IconButton(onClick = { showDeleteDialog = true }) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        tint = MaterialTheme.colorScheme.error
-                    )
-                }
+            IconButton(onClick = { showDeleteDialog = true }) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.error
+                )
             }
         }
     }
