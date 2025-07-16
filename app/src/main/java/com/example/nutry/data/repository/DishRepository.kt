@@ -32,6 +32,9 @@ class DishRepository(private val dishDao: DishDao) {
     suspend fun getDishIngredients(dishId: Int): List<DishIngredient> = 
         dishDao.getDishIngredients(dishId)
     
+    suspend fun getAllDishIngredients(): List<DishIngredient> = 
+        dishDao.getAllDishIngredients()
+    
     suspend fun getIngredientsByDish(dishId: Int): List<Ingredient> = 
         dishDao.getIngredientsByDish(dishId)
     

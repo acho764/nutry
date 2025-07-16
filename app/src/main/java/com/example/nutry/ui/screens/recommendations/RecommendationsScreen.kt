@@ -56,14 +56,7 @@ fun RecommendationsScreen() {
             text = "Recommendation Mode:",
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        
-        Text(
-            text = if (recommendationMode == RecommendationType.DISH_BASED) "Dish-based (freshness based on dish consumption)" else "Ingredient-based (average freshness of dish ingredients)",
-            fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(bottom = 16.dp)
         )
         
         Card(
@@ -72,35 +65,35 @@ fun RecommendationsScreen() {
                 .padding(bottom = 16.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Dish-based",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "Ingredient-based",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                Text(
+                    text = "Dish-based",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = if (recommendationMode == RecommendationType.DISH_BASED) 
+                        MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 
-                Slider(
-                    value = if (recommendationMode == RecommendationType.DISH_BASED) 0f else 1f,
-                    onValueChange = { value ->
-                        val newMode = if (value < 0.5f) RecommendationType.DISH_BASED else RecommendationType.INGREDIENT_BASED
+                Switch(
+                    checked = recommendationMode == RecommendationType.INGREDIENT_BASED,
+                    onCheckedChange = { isChecked ->
+                        val newMode = if (isChecked) RecommendationType.INGREDIENT_BASED else RecommendationType.DISH_BASED
                         viewModel.setRecommendationMode(newMode)
-                    },
-                    valueRange = 0f..1f,
-                    steps = 0,
-                    modifier = Modifier.fillMaxWidth()
+                    }
+                )
+                
+                Text(
+                    text = "Ingredient-based",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = if (recommendationMode == RecommendationType.INGREDIENT_BASED) 
+                        MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

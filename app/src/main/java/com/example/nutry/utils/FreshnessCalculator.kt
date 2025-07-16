@@ -19,16 +19,30 @@ object FreshnessCalculator {
     fun calculateIngredientFreshness(
         ingredient: Ingredient,
         trackEntries: List<TrackEntry>,
-        ingredientBasedTimewindow: Int
+        ingredientBasedTimewindow: Int,
+        dishIngredientRelationships: List<com.example.nutry.data.entities.DishIngredient> = emptyList()
     ): Int {
         val now = Date()
         val timewindowInMillis = ingredientBasedTimewindow * 24 * 60 * 60 * 1000L
         val cutoffDate = Date(now.time - timewindowInMillis)
         
         // Filter track entries for this ingredient within the timewindow
-        val recentEntries = trackEntries.filter { entry ->
+        val directIngredientEntries = trackEntries.filter { entry ->
             entry.ingredientId == ingredient.id && entry.consumedAt.after(cutoffDate)
         }
+        
+        // Also consider dish consumption that contains this ingredient
+        val dishesContainingIngredient = dishIngredientRelationships.filter { 
+            it.ingredientId == ingredient.id 
+        }.map { it.dishId }
+        
+        val dishConsumptionEntries = trackEntries.filter { entry ->
+            entry.dishId != null && 
+            dishesContainingIngredient.contains(entry.dishId) && 
+            entry.consumedAt.after(cutoffDate)
+        }
+        
+        val recentEntries = directIngredientEntries + dishConsumptionEntries
         
         if (recentEntries.isEmpty()) {
             // No consumption in the timewindow = 100% fresh
@@ -101,7 +115,7 @@ object FreshnessCalculator {
         
         // Calculate freshness for each ingredient
         val ingredientFreshnesses = dishIngredients.map { ingredient ->
-            calculateIngredientFreshness(ingredient, allTrackEntries, ingredientBasedTimewindow)
+            calculateIngredientFreshness(ingredient, allTrackEntries, ingredientBasedTimewindow, emptyList())
         }
         
         // Return average freshness of all ingredients

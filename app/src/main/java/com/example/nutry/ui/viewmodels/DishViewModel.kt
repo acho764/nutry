@@ -21,6 +21,9 @@ class DishViewModel(private val repository: DishRepository) : ViewModel() {
     private val _dishIngredients = MutableStateFlow<Map<Int, List<IngredientWithCategory>>>(emptyMap())
     val dishIngredients: StateFlow<Map<Int, List<IngredientWithCategory>>> = _dishIngredients.asStateFlow()
     
+    private val _allDishIngredients = MutableStateFlow<List<DishIngredient>>(emptyList())
+    val allDishIngredients: StateFlow<List<DishIngredient>> = _allDishIngredients.asStateFlow()
+    
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
     
@@ -29,6 +32,7 @@ class DishViewModel(private val repository: DishRepository) : ViewModel() {
     
     init {
         observeDishes()
+        loadAllDishIngredients()
     }
     
     private fun observeDishes() {
@@ -55,6 +59,17 @@ class DishViewModel(private val repository: DishRepository) : ViewModel() {
         }
     }
     
+    private fun loadAllDishIngredients() {
+        viewModelScope.launch {
+            try {
+                val allDishIngredients = repository.getAllDishIngredients()
+                _allDishIngredients.value = allDishIngredients
+            } catch (e: Exception) {
+                _error.value = "Error loading dish ingredients: ${e.message}"
+            }
+        }
+    }
+    
     fun insertDish(name: String, emoji: String, ingredientIds: List<Int>) {
         viewModelScope.launch {
             try {
@@ -75,6 +90,7 @@ class DishViewModel(private val repository: DishRepository) : ViewModel() {
                 
                 // Refresh all dish ingredients to ensure UI is updated
                 loadIngredientsForDishes(_dishes.value)
+                loadAllDishIngredients()
             } catch (e: Exception) {
                 _error.value = "Error adding dish: ${e.message}"
             } finally {
@@ -103,6 +119,7 @@ class DishViewModel(private val repository: DishRepository) : ViewModel() {
                 
                 // Refresh all dish ingredients to ensure UI is updated
                 loadIngredientsForDishes(_dishes.value)
+                loadAllDishIngredients()
             } catch (e: Exception) {
                 _error.value = "Error updating dish: ${e.message}"
             } finally {

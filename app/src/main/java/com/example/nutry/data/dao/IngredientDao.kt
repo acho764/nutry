@@ -8,6 +8,9 @@ import kotlinx.coroutines.flow.Flow
 interface IngredientDao {
     @Query("SELECT * FROM ingredients ORDER BY name ASC")
     fun getAllIngredients(): Flow<List<Ingredient>>
+    
+    @Query("SELECT * FROM ingredients ORDER BY name ASC")
+    suspend fun getAllIngredientsSync(): List<Ingredient>
 
     @Query("SELECT * FROM ingredients WHERE categoryId = :categoryId ORDER BY name ASC")
     fun getIngredientsByCategory(categoryId: Int): Flow<List<Ingredient>>

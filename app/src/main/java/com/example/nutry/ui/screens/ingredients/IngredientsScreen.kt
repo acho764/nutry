@@ -56,6 +56,7 @@ fun IngredientsScreen() {
     val ingredients by ingredientViewModel.ingredients.collectAsState()
     val dishes by dishViewModel.dishes.collectAsState()
     val trackEntries by trackViewModel.trackEntries.collectAsState()
+    val allDishIngredients by dishViewModel.allDishIngredients.collectAsState()
     val isLoading by categoryViewModel.isLoading.collectAsState()
     val error by categoryViewModel.error.collectAsState()
     
@@ -138,7 +139,7 @@ fun IngredientsScreen() {
                 val categoryIngredients = ingredients.filter { it.categoryId == category.id }
                 items(categoryIngredients) { ingredient ->
                     val freshnessScore = FreshnessCalculator.calculateIngredientFreshness(
-                        ingredient, trackEntries, 7 // Default timewindow
+                        ingredient, trackEntries, 7, allDishIngredients // Default timewindow
                     )
                     IngredientItem(
                         ingredient = ingredient,
@@ -184,6 +185,10 @@ fun IngredientsScreen() {
             onDismiss = { editingCategory = null },
             onSave = { name, emoji ->
                 categoryViewModel.updateCategory(category.copy(name = name, emoji = emoji))
+                editingCategory = null
+            },
+            onDelete = { categoryToDelete ->
+                categoryViewModel.deleteCategory(categoryToDelete)
                 editingCategory = null
             }
         )

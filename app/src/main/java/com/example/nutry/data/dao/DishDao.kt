@@ -37,6 +37,9 @@ interface DishDao {
     @Query("SELECT * FROM dish_ingredients WHERE dishId = :dishId")
     suspend fun getDishIngredients(dishId: Int): List<DishIngredient>
 
+    @Query("SELECT * FROM dish_ingredients")
+    suspend fun getAllDishIngredients(): List<DishIngredient>
+
     @Query("""
         SELECT i.* FROM ingredients i 
         INNER JOIN dish_ingredients di ON i.id = di.ingredientId 
