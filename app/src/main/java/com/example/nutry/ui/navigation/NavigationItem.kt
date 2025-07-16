@@ -1,11 +1,11 @@
 package com.example.nutry.ui.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Analytics
 import androidx.compose.material.icons.outlined.Eco
-import androidx.compose.material.icons.outlined.RamenDining
+import androidx.compose.material.icons.outlined.LocalPizza
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class NavigationItem(
@@ -22,7 +22,7 @@ sealed class NavigationItem(
     object Dishes : NavigationItem(
         route = "dishes", 
         title = "Dishes",
-        icon = Icons.Outlined.RamenDining
+        icon = Icons.Outlined.LocalPizza
     )
     
     object Track : NavigationItem(
@@ -33,8 +33,8 @@ sealed class NavigationItem(
     
     object Recommendations : NavigationItem(
         route = "recommendations",
-        title = "Recommendations",
-        icon = Icons.Default.Favorite
+        title = "Ideas",
+        icon = Icons.Outlined.Lightbulb
     )
     
     object Settings : NavigationItem(
