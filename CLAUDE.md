@@ -630,6 +630,19 @@ The Nutry app successfully demonstrates advanced Android development practices w
 - **Build status**: ✅ **SUCCESSFUL** (assembleDebug, installDebug all pass)
 - **User experience**: Accurate freshness scores when tracking dishes - ingredients properly decrease in freshness
 
+#### 💡 **FUTURE IMPROVEMENT: SIMPLIFIED FRESHNESS SYSTEM - PLANNED**
+- **Current issue**: Complex dish-ingredient freshness calculation with multiple table joins
+- **Better solution identified**: Add `lastEaten` column to Ingredients table for simpler approach
+- **Proposed changes**:
+  - **📊 Database Schema**: Add `lastEaten: Date?` field to Ingredients entity
+  - **🔄 Tracking Logic**: When tracking dish/ingredient, update `lastEaten` for all affected ingredients
+  - **🧮 Simplified Calculator**: Calculate freshness directly from `ingredient.lastEaten` field
+  - **⚡ Performance**: Much faster - no complex queries or table joins needed
+  - **🎯 Logic**: When tracking dish → update `lastEaten` for all ingredients in dish
+  - **📱 Cleaner Code**: Remove complex dish-ingredient relationship queries from FreshnessCalculator
+- **Status**: ⏳ **PLANNED** - Will implement when usage limit allows
+- **Benefits**: Simpler, faster, more maintainable freshness calculation system
+
 ### 🏆 **FINAL PROJECT STATUS - FULLY ENHANCED**
 **ALL 70 TASKS COMPLETED SUCCESSFULLY:**
 1. ✅ Complete Database Schema
