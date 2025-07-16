@@ -7,6 +7,8 @@ import com.example.nutry.data.entities.Dish
 import com.example.nutry.data.entities.Ingredient
 import com.example.nutry.data.entities.Settings
 import com.example.nutry.data.entities.TrackEntry
+import com.example.nutry.data.entities.Category
+import com.example.nutry.data.entities.IngredientWithCategoryData
 import com.example.nutry.data.repository.DishRepository
 import com.example.nutry.data.repository.IngredientRepository
 import com.example.nutry.data.repository.SettingsRepository
@@ -119,9 +121,24 @@ class RecommendationsViewModel(
         settings: Settings
     ): List<RecommendationItem> {
         return dishes.map { dish ->
-            val dishIngredients = dishRepository.getIngredientsByDish(dish.id)
+            val dishIngredients = dishRepository.getIngredientsWithCategoriesByDish(dish.id)
+            val ingredientCategoryPairs = dishIngredients.map { ingredientData ->
+                val ingredient = Ingredient(
+                    id = ingredientData.id,
+                    name = ingredientData.name,
+                    categoryId = ingredientData.categoryId,
+                    emoji = ingredientData.emoji,
+                    lastEaten = ingredientData.lastEaten
+                )
+                val category = Category(
+                    id = ingredientData.categoryId,
+                    name = ingredientData.categoryName,
+                    emoji = ingredientData.categoryEmoji
+                )
+                ingredient to category
+            }
             val freshnessScore = FreshnessCalculator.calculateDishFreshnessFromIngredients(
-                dish, dishIngredients, settings.ingredientBasedTimewindow
+                dish, ingredientCategoryPairs, settings.ingredientBasedTimewindow, settings.excludeSpices
             )
             RecommendationItem(
                 dish = dish,

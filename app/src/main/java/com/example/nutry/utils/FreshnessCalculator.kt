@@ -3,6 +3,7 @@ package com.example.nutry.utils
 import com.example.nutry.data.entities.Dish
 import com.example.nutry.data.entities.Ingredient
 import com.example.nutry.data.entities.TrackEntry
+import com.example.nutry.data.entities.Category
 import java.util.Date
 
 object FreshnessCalculator {
@@ -11,12 +12,21 @@ object FreshnessCalculator {
      * Calculate freshness score for an ingredient based on its lastEaten field
      * @param ingredient The ingredient to calculate freshness for
      * @param ingredientBasedTimewindow Number of days for 100% freshness
+     * @param category The category of the ingredient
+     * @param excludeSpices Whether to exclude spices from freshness calculation (returns 100% for individual spice display)
      * @return Freshness score as percentage (0-100)
      */
     fun calculateIngredientFreshness(
         ingredient: Ingredient,
-        ingredientBasedTimewindow: Int
+        ingredientBasedTimewindow: Int,
+        category: Category? = null,
+        excludeSpices: Boolean = false
     ): Int {
+        // If excluding spices and this is a spice, return 100% (always fresh)
+        if (excludeSpices && (category?.name?.contains("Подправки") == true || category?.name?.contains("Spices") == true)) {
+            return 100
+        }
+        
         val lastEaten = ingredient.lastEaten
         
         if (lastEaten == null) {
@@ -57,25 +67,41 @@ object FreshnessCalculator {
     /**
      * Calculate freshness score for a dish based on its ingredients' freshness
      * @param dish The dish to calculate freshness for
-     * @param dishIngredients List of ingredients in this dish
+     * @param dishIngredients List of ingredients in this dish with their categories
      * @param ingredientBasedTimewindow Number of days for 100% freshness for ingredients
+     * @param excludeSpices Whether to exclude spices from freshness calculation
      * @return Freshness score as percentage (0-100)
      */
     fun calculateDishFreshnessFromIngredients(
         dish: Dish,
-        dishIngredients: List<Ingredient>,
-        ingredientBasedTimewindow: Int
+        dishIngredients: List<Pair<Ingredient, Category?>>,
+        ingredientBasedTimewindow: Int,
+        excludeSpices: Boolean = false
     ): Int {
         if (dishIngredients.isEmpty()) {
             return 100
         }
         
-        // Calculate freshness for each ingredient using simplified method
-        val ingredientFreshnesses = dishIngredients.map { ingredient ->
-            calculateIngredientFreshness(ingredient, ingredientBasedTimewindow)
+        // Filter out spices if excludeSpices is enabled
+        val relevantIngredients = if (excludeSpices) {
+            dishIngredients.filter { (ingredient, category) ->
+                !(category?.name?.contains("Подправки") == true || category?.name?.contains("Spices") == true)
+            }
+        } else {
+            dishIngredients
         }
         
-        // Return average freshness of all ingredients
+        // If no relevant ingredients remain after filtering, return 100%
+        if (relevantIngredients.isEmpty()) {
+            return 100
+        }
+        
+        // Calculate freshness for each relevant ingredient (without excludeSpices override)
+        val ingredientFreshnesses = relevantIngredients.map { (ingredient, category) ->
+            calculateIngredientFreshness(ingredient, ingredientBasedTimewindow, category, excludeSpices = false)
+        }
+        
+        // Return average freshness of relevant ingredients only
         return ingredientFreshnesses.average().toInt()
     }
     

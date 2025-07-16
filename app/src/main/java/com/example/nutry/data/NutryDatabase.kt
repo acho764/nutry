@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
         TrackEntry::class,
         Settings::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -44,6 +44,13 @@ abstract class NutryDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Add excludeSpices column to settings table
+                database.execSQL("ALTER TABLE settings ADD COLUMN excludeSpices INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         fun getDatabase(context: Context, scope: CoroutineScope): NutryDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -52,7 +59,7 @@ abstract class NutryDatabase : RoomDatabase() {
                     "nutry_database"
                 )
                     .addCallback(NutryDatabaseCallback(scope))
-                    .addMigrations(MIGRATION_4_5)
+                    .addMigrations(MIGRATION_4_5, MIGRATION_5_6)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance

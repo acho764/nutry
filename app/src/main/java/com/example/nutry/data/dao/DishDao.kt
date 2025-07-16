@@ -3,6 +3,7 @@ package com.example.nutry.data.dao
 import androidx.room.*
 import com.example.nutry.data.entities.Dish
 import com.example.nutry.data.entities.DishIngredient
+import com.example.nutry.data.entities.IngredientWithCategoryData
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -58,4 +59,13 @@ interface DishDao {
     
     @Query("SELECT ingredientId FROM dish_ingredients WHERE dishId = :dishId")
     suspend fun getIngredientIdsByDish(dishId: Int): List<Int>
+    
+    @Query("""
+        SELECT i.*, c.name as categoryName, c.emoji as categoryEmoji
+        FROM ingredients i 
+        INNER JOIN categories c ON i.categoryId = c.id
+        INNER JOIN dish_ingredients di ON i.id = di.ingredientId 
+        WHERE di.dishId = :dishId
+    """)
+    suspend fun getIngredientsWithCategoriesByDish(dishId: Int): List<IngredientWithCategoryData>
 }

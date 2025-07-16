@@ -8,5 +8,6 @@ data class Settings(
     @PrimaryKey
     val id: Int = 1,
     val ingredientBasedTimewindow: Int = 7,
-    val dishBasedTimewindow: Int = 14
+    val dishBasedTimewindow: Int = 14,
+    val excludeSpices: Boolean = false
 )

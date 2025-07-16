@@ -24,3 +24,13 @@ data class Ingredient(
     val emoji: String = "",
     val lastEaten: Date? = null
 )
+
+data class IngredientWithCategoryData(
+    val id: Int,
+    val name: String,
+    val categoryId: Int,
+    val emoji: String,
+    val lastEaten: Date?,
+    val categoryName: String,
+    val categoryEmoji: String
+)

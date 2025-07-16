@@ -143,7 +143,10 @@ fun IngredientsScreen() {
                 val categoryIngredients = ingredients.filter { it.categoryId == category.id }
                 items(categoryIngredients) { ingredient ->
                     val freshnessScore = FreshnessCalculator.calculateIngredientFreshness(
-                        ingredient, settings?.ingredientBasedTimewindow ?: 7
+                        ingredient, 
+                        settings?.ingredientBasedTimewindow ?: 7, 
+                        category, 
+                        settings?.excludeSpices ?: false
                     )
                     IngredientItem(
                         ingredient = ingredient,

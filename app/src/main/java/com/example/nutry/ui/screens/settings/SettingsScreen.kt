@@ -31,11 +31,13 @@ fun SettingsScreen() {
     
     var ingredientTimewindow by remember { mutableStateOf(7f) }
     var dishTimewindow by remember { mutableStateOf(14f) }
+    var excludeSpices by remember { mutableStateOf(false) }
     
     // Update local state when settings change
     LaunchedEffect(settings) {
         ingredientTimewindow = settings.ingredientBasedTimewindow.toFloat()
         dishTimewindow = settings.dishBasedTimewindow.toFloat()
+        excludeSpices = settings.excludeSpices
     }
     
     Column(
@@ -222,6 +224,53 @@ fun SettingsScreen() {
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        // Exclude Spices toggle
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = "Exclude Spices from Freshness",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Text(
+                            text = "🧂 Подправки category won't affect freshness scores",
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    
+                    Switch(
+                        checked = excludeSpices,
+                        onCheckedChange = { newValue ->
+                            excludeSpices = newValue
+                            val newSettings = settings.copy(excludeSpices = newValue)
+                            viewModel.updateSettings(newSettings)
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = androidx.compose.ui.graphics.Color(0xFF4CAF50),
+                            checkedTrackColor = androidx.compose.ui.graphics.Color(0xFF4CAF50).copy(alpha = 0.5f)
+                        )
+                    )
                 }
             }
         }
