@@ -28,7 +28,7 @@ class TrackViewModel(private val repository: TrackRepository) : ViewModel() {
     
     private fun observeTrackEntries() {
         viewModelScope.launch {
-            repository.getAllTrackEntries().collect { entries ->
+            repository.getUserInitiatedTrackEntries().collect { entries ->
                 _trackEntries.value = entries
             }
         }

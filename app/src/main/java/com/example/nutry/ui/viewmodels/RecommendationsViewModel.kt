@@ -127,8 +127,7 @@ class RecommendationsViewModel(
                     id = ingredientData.id,
                     name = ingredientData.name,
                     categoryId = ingredientData.categoryId,
-                    emoji = ingredientData.emoji,
-                    lastEaten = ingredientData.lastEaten
+                    emoji = ingredientData.emoji
                 )
                 val category = Category(
                     id = ingredientData.categoryId,
@@ -138,7 +137,7 @@ class RecommendationsViewModel(
                 ingredient to category
             }
             val freshnessScore = FreshnessCalculator.calculateDishFreshnessFromIngredients(
-                dish, ingredientCategoryPairs, settings.ingredientBasedTimewindow, settings.excludeSpices
+                dish, ingredientCategoryPairs, trackEntries, settings.ingredientBasedTimewindow, settings.excludeSpices
             )
             RecommendationItem(
                 dish = dish,

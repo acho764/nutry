@@ -9,8 +9,9 @@ import java.util.Date
 object FreshnessCalculator {
     
     /**
-     * Calculate freshness score for an ingredient based on its lastEaten field
+     * Calculate freshness score for an ingredient based on track entries
      * @param ingredient The ingredient to calculate freshness for
+     * @param trackEntries List of track entries for this ingredient
      * @param ingredientBasedTimewindow Number of days for 100% freshness
      * @param category The category of the ingredient
      * @param excludeSpices Whether to exclude spices from freshness calculation (returns 100% for individual spice display)
@@ -18,6 +19,7 @@ object FreshnessCalculator {
      */
     fun calculateIngredientFreshness(
         ingredient: Ingredient,
+        trackEntries: List<TrackEntry>,
         ingredientBasedTimewindow: Int,
         category: Category? = null,
         excludeSpices: Boolean = false
@@ -27,15 +29,18 @@ object FreshnessCalculator {
             return 100
         }
         
-        val lastEaten = ingredient.lastEaten
+        // Find the most recent consumption of this ingredient (direct consumption only)
+        val mostRecentEntry = trackEntries
+            .filter { it.ingredientId == ingredient.id }
+            .maxByOrNull { it.consumedAt }
         
-        if (lastEaten == null) {
+        if (mostRecentEntry == null) {
             // Never consumed = 100% fresh
             return 100
         }
         
         val now = Date()
-        return calculateFreshnessFromLastConsumption(lastEaten, now, ingredientBasedTimewindow)
+        return calculateFreshnessFromLastConsumption(mostRecentEntry.consumedAt, now, ingredientBasedTimewindow)
     }
     
     /**
@@ -68,6 +73,7 @@ object FreshnessCalculator {
      * Calculate freshness score for a dish based on its ingredients' freshness
      * @param dish The dish to calculate freshness for
      * @param dishIngredients List of ingredients in this dish with their categories
+     * @param trackEntries List of track entries for freshness calculation
      * @param ingredientBasedTimewindow Number of days for 100% freshness for ingredients
      * @param excludeSpices Whether to exclude spices from freshness calculation
      * @return Freshness score as percentage (0-100)
@@ -75,6 +81,7 @@ object FreshnessCalculator {
     fun calculateDishFreshnessFromIngredients(
         dish: Dish,
         dishIngredients: List<Pair<Ingredient, Category?>>,
+        trackEntries: List<TrackEntry>,
         ingredientBasedTimewindow: Int,
         excludeSpices: Boolean = false
     ): Int {
@@ -98,7 +105,7 @@ object FreshnessCalculator {
         
         // Calculate freshness for each relevant ingredient (without excludeSpices override)
         val ingredientFreshnesses = relevantIngredients.map { (ingredient, category) ->
-            calculateIngredientFreshness(ingredient, ingredientBasedTimewindow, category, excludeSpices = false)
+            calculateIngredientFreshness(ingredient, trackEntries, ingredientBasedTimewindow, category, excludeSpices = false)
         }
         
         // Return average freshness of relevant ingredients only

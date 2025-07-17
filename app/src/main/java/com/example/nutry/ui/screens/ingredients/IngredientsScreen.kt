@@ -60,6 +60,7 @@ fun IngredientsScreen() {
     val categories by categoryViewModel.categories.collectAsState()
     val ingredients by ingredientViewModel.ingredients.collectAsState()
     val dishes by dishViewModel.dishes.collectAsState()
+    val trackEntries by trackViewModel.trackEntries.collectAsState()
     val settings by settingsViewModel.settings.collectAsState()
     val isLoading by categoryViewModel.isLoading.collectAsState()
     val error by categoryViewModel.error.collectAsState()
@@ -144,6 +145,7 @@ fun IngredientsScreen() {
                 items(categoryIngredients) { ingredient ->
                     val freshnessScore = FreshnessCalculator.calculateIngredientFreshness(
                         ingredient, 
+                        trackEntries,
                         settings?.ingredientBasedTimewindow ?: 7, 
                         category, 
                         settings?.excludeSpices ?: false
