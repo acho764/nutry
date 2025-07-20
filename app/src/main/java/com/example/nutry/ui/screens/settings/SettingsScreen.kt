@@ -83,147 +83,107 @@ fun SettingsScreen() {
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier.padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
                     text = "Freshness Timewindows",
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
                 )
                 
-                Text(
-                    text = "Configure how many days should pass for an item to be considered 100% fresh again after consumption.",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                
                 // Ingredient timewindow slider
-                Card(
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                    )
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Ingredient-based timewindow",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
+                    Text(
+                        text = "Ingredients",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.weight(0.3f)
+                    )
+                    
+                    Slider(
+                        value = ingredientTimewindow,
+                        onValueChange = { newValue ->
+                            ingredientTimewindow = newValue
+                        },
+                        onValueChangeFinished = {
+                            val newSettings = settings.copy(
+                                ingredientBasedTimewindow = ingredientTimewindow.toInt()
                             )
-                            Text(
-                                text = "${ingredientTimewindow.toInt()} days",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        
-                        Slider(
-                            value = ingredientTimewindow,
-                            onValueChange = { newValue ->
-                                ingredientTimewindow = newValue
-                            },
-                            onValueChangeFinished = {
-                                // Auto-save when slider drag finishes
-                                val newSettings = settings.copy(
-                                    ingredientBasedTimewindow = ingredientTimewindow.toInt()
-                                )
-                                viewModel.updateSettings(newSettings)
-                            },
-                            valueRange = 1f..30f,
-                            steps = 28,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(24.dp),
-                            colors = SliderDefaults.colors(
-                                thumbColor = androidx.compose.ui.graphics.Color(0xFF4CAF50),
-                                activeTrackColor = androidx.compose.ui.graphics.Color(0xFF4CAF50),
-                                inactiveTrackColor = androidx.compose.ui.graphics.Color(0xFF9E9E9E),
-                                activeTickColor = androidx.compose.ui.graphics.Color.White,
-                                inactiveTickColor = androidx.compose.ui.graphics.Color.White
-                            )
+                            viewModel.updateSettings(newSettings)
+                        },
+                        valueRange = 1f..30f,
+                        steps = 28,
+                        modifier = Modifier
+                            .weight(0.5f)
+                            .height(20.dp),
+                        colors = SliderDefaults.colors(
+                            thumbColor = androidx.compose.ui.graphics.Color(0xFF4CAF50),
+                            activeTrackColor = androidx.compose.ui.graphics.Color(0xFF4CAF50),
+                            inactiveTrackColor = androidx.compose.ui.graphics.Color(0xFF9E9E9E),
+                            activeTickColor = androidx.compose.ui.graphics.Color.White,
+                            inactiveTickColor = androidx.compose.ui.graphics.Color.White
                         )
-                        
-                        Text(
-                            text = "Days until ingredients are considered fresh again",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    )
+                    
+                    Text(
+                        text = "${ingredientTimewindow.toInt()}d",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.weight(0.2f)
+                    )
                 }
                 
-                Spacer(modifier = Modifier.height(8.dp))
-                
                 // Dish timewindow slider
-                Card(
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                    )
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Dish-based timewindow",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
+                    Text(
+                        text = "Dishes",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.weight(0.3f)
+                    )
+                    
+                    Slider(
+                        value = dishTimewindow,
+                        onValueChange = { newValue ->
+                            dishTimewindow = newValue
+                        },
+                        onValueChangeFinished = {
+                            val newSettings = settings.copy(
+                                dishBasedTimewindow = dishTimewindow.toInt()
                             )
-                            Text(
-                                text = "${dishTimewindow.toInt()} days",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        
-                        Slider(
-                            value = dishTimewindow,
-                            onValueChange = { newValue ->
-                                dishTimewindow = newValue
-                            },
-                            onValueChangeFinished = {
-                                // Auto-save when slider drag finishes
-                                val newSettings = settings.copy(
-                                    dishBasedTimewindow = dishTimewindow.toInt()
-                                )
-                                viewModel.updateSettings(newSettings)
-                            },
-                            valueRange = 1f..30f,
-                            steps = 28,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(24.dp),
-                            colors = SliderDefaults.colors(
-                                thumbColor = androidx.compose.ui.graphics.Color(0xFF4CAF50),
-                                activeTrackColor = androidx.compose.ui.graphics.Color(0xFF4CAF50),
-                                inactiveTrackColor = androidx.compose.ui.graphics.Color(0xFF9E9E9E),
-                                activeTickColor = androidx.compose.ui.graphics.Color.White,
-                                inactiveTickColor = androidx.compose.ui.graphics.Color.White
-                            )
+                            viewModel.updateSettings(newSettings)
+                        },
+                        valueRange = 1f..30f,
+                        steps = 28,
+                        modifier = Modifier
+                            .weight(0.5f)
+                            .height(20.dp),
+                        colors = SliderDefaults.colors(
+                            thumbColor = androidx.compose.ui.graphics.Color(0xFF4CAF50),
+                            activeTrackColor = androidx.compose.ui.graphics.Color(0xFF4CAF50),
+                            inactiveTrackColor = androidx.compose.ui.graphics.Color(0xFF9E9E9E),
+                            activeTickColor = androidx.compose.ui.graphics.Color.White,
+                            inactiveTickColor = androidx.compose.ui.graphics.Color.White
                         )
-                        
-                        Text(
-                            text = "Days until dishes are considered fresh again",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    )
+                    
+                    Text(
+                        text = "${dishTimewindow.toInt()}d",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.weight(0.2f)
+                    )
                 }
             }
         }

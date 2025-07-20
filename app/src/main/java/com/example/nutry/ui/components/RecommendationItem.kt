@@ -15,11 +15,13 @@ import com.example.nutry.ui.viewmodels.RecommendationType
 @Composable
 fun RecommendationItemCard(
     recommendation: RecommendationItem,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onTrackConsumption: ((RecommendationItem) -> Unit)? = null
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        onClick = { onTrackConsumption?.invoke(recommendation) }
     ) {
         Column(
             modifier = Modifier

@@ -5,6 +5,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -68,10 +70,37 @@ fun IngredientsScreen() {
     var showAddCategoryDialog by remember { mutableStateOf(false) }
     var showAddIngredientDialog by remember { mutableStateOf(false) }
     var showAddChoiceDialog by remember { mutableStateOf(false) }
-    var showEatDialog by remember { mutableStateOf(false) }
+    var showEatConfirmation by remember { mutableStateOf(false) }
     var editingCategory by remember { mutableStateOf<Category?>(null) }
     var editingIngredient by remember { mutableStateOf<Ingredient?>(null) }
     var eatingIngredient by remember { mutableStateOf<Ingredient?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
+    var showSearch by remember { mutableStateOf(false) }
+    
+    // Filter categories and ingredients based on search query
+    val filteredCategories = remember(categories, ingredients, searchQuery) {
+        if (searchQuery.isBlank()) {
+            categories
+        } else {
+            categories.filter { category ->
+                category.name.contains(searchQuery, ignoreCase = true) ||
+                ingredients.any { ingredient ->
+                    ingredient.categoryId == category.id &&
+                    ingredient.name.contains(searchQuery, ignoreCase = true)
+                }
+            }
+        }
+    }
+    
+    val filteredIngredients = remember(ingredients, searchQuery) {
+        if (searchQuery.isBlank()) {
+            ingredients
+        } else {
+            ingredients.filter { ingredient ->
+                ingredient.name.contains(searchQuery, ignoreCase = true)
+            }
+        }
+    }
     
     Column(
         modifier = Modifier
@@ -85,20 +114,61 @@ fun IngredientsScreen() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "🥬 Ingredients",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
-            )
-            
-            FloatingActionButton(
-                onClick = { showAddChoiceDialog = true },
-                modifier = Modifier.size(48.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add"
+            if (!showSearch) {
+                Text(
+                    text = "🥬 Ingredients",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
                 )
+            } else {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = { Text("Search ingredients...") },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search"
+                        )
+                    },
+                    trailingIcon = if (searchQuery.isNotEmpty()) {
+                        {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(
+                                    imageVector = Icons.Default.Clear,
+                                    contentDescription = "Clear"
+                                )
+                            }
+                        }
+                    } else null,
+                    modifier = Modifier.weight(1f),
+                    singleLine = true
+                )
+            }
+            
+            Row {
+                IconButton(
+                    onClick = { 
+                        showSearch = !showSearch
+                        if (!showSearch) searchQuery = ""
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Toggle Search"
+                    )
+                }
+                
+                FloatingActionButton(
+                    onClick = { showAddChoiceDialog = true },
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add"
+                    )
+                }
             }
         }
         
@@ -131,37 +201,52 @@ fun IngredientsScreen() {
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            categories.forEach { category ->
+            if (filteredCategories.isEmpty() && searchQuery.isNotBlank()) {
                 item {
-                    CategoryItem(
-                        category = category,
-                        onEdit = { editingCategory = it },
-                        onDelete = { categoryViewModel.deleteCategory(it) },
-                        onClick = { editingCategory = it }
-                    )
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Text(
+                            text = "No ingredients found for \"$searchQuery\"",
+                            modifier = Modifier.padding(16.dp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
-                
-                val categoryIngredients = ingredients.filter { it.categoryId == category.id }
-                items(categoryIngredients) { ingredient ->
-                    val freshnessScore = FreshnessCalculator.calculateIngredientFreshness(
-                        ingredient, 
-                        trackEntries,
-                        settings?.ingredientBasedTimewindow ?: 7, 
-                        category, 
-                        settings?.excludeSpices ?: false
-                    )
-                    IngredientItem(
-                        ingredient = ingredient,
-                        category = category,
-                        freshnessScore = freshnessScore,
-                        onEdit = { editingIngredient = it },
-                        onDelete = { ingredientViewModel.deleteIngredient(it) },
-                        onEat = { 
-                            eatingIngredient = it
-                            showEatDialog = true
-                        },
-                        onClick = { editingIngredient = it }
-                    )
+            } else {
+                filteredCategories.forEach { category ->
+                    item {
+                        CategoryItem(
+                            category = category,
+                            onEdit = { editingCategory = it },
+                            onDelete = { categoryViewModel.deleteCategory(it) },
+                            onClick = { editingCategory = it }
+                        )
+                    }
+                    
+                    val categoryIngredients = filteredIngredients.filter { it.categoryId == category.id }
+                    items(categoryIngredients) { ingredient ->
+                        val freshnessScore = FreshnessCalculator.calculateIngredientFreshness(
+                            ingredient, 
+                            trackEntries,
+                            settings?.ingredientBasedTimewindow ?: 7, 
+                            category, 
+                            settings?.excludeSpices ?: false
+                        )
+                        IngredientItem(
+                            ingredient = ingredient,
+                            category = category,
+                            freshnessScore = freshnessScore,
+                            onEdit = { editingIngredient = it },
+                            onDelete = { ingredientViewModel.deleteIngredient(it) },
+                            onEat = { 
+                                eatingIngredient = it
+                                showEatConfirmation = true
+                            },
+                            onClick = { editingIngredient = it }
+                        )
+                    }
                 }
             }
         }
@@ -247,19 +332,37 @@ fun IngredientsScreen() {
         )
     }
     
-    if (showEatDialog) {
+    if (showEatConfirmation) {
         eatingIngredient?.let { ingredient ->
-            TrackDialog(
-                dishes = dishes,
-                ingredients = ingredients,
-                onDismiss = { 
-                    showEatDialog = false
+            AlertDialog(
+                onDismissRequest = { 
+                    showEatConfirmation = false
                     eatingIngredient = null
                 },
-                onSave = { dishId, ingredientId, quantity, date ->
-                    trackViewModel.insertTrackEntry(null, ingredient.id, quantity)
-                    showEatDialog = false
-                    eatingIngredient = null
+                title = { Text("Track Consumption") },
+                text = { 
+                    Text("Track consumption of ${ingredient.emoji} ${ingredient.name}?")
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            trackViewModel.insertTrackEntry(null, ingredient.id, 1.0)
+                            showEatConfirmation = false
+                            eatingIngredient = null
+                        }
+                    ) {
+                        Text("Track")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showEatConfirmation = false
+                            eatingIngredient = null
+                        }
+                    ) {
+                        Text("Cancel")
+                    }
                 }
             )
         }

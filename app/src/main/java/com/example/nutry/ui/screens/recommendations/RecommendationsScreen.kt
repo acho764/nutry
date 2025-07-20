@@ -20,6 +20,8 @@ import com.example.nutry.ui.components.RecommendationItemCard
 import com.example.nutry.ui.viewmodels.RecommendationsViewModel
 import com.example.nutry.ui.viewmodels.RecommendationsViewModelFactory
 import com.example.nutry.ui.viewmodels.RecommendationType
+import com.example.nutry.ui.viewmodels.TrackViewModel
+import com.example.nutry.ui.viewmodels.TrackViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,11 +36,17 @@ fun RecommendationsScreen() {
             application.settingsRepository
         )
     )
+    val trackViewModel: TrackViewModel = viewModel(
+        factory = TrackViewModelFactory(application.trackRepository)
+    )
     
     val recommendations by viewModel.recommendations.collectAsState()
     val recommendationMode by viewModel.recommendationMode.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
+    
+    var showTrackConfirmation by remember { mutableStateOf(false) }
+    var selectedRecommendation by remember { mutableStateOf<com.example.nutry.ui.viewmodels.RecommendationItem?>(null) }
     
     Column(
         modifier = Modifier
@@ -154,10 +162,52 @@ fun RecommendationsScreen() {
                 items(recommendations) { recommendation ->
                     RecommendationItemCard(
                         recommendation = recommendation,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        onTrackConsumption = { clickedRecommendation ->
+                            selectedRecommendation = clickedRecommendation
+                            showTrackConfirmation = true
+                        }
                     )
                 }
             }
+        }
+    }
+    
+    // Track confirmation dialog
+    if (showTrackConfirmation) {
+        selectedRecommendation?.dish?.let { dish ->
+            AlertDialog(
+                onDismissRequest = { 
+                    showTrackConfirmation = false
+                    selectedRecommendation = null
+                },
+                title = { Text("Track Consumption") },
+                text = { 
+                    Text("Track consumption of ${dish.emoji} ${dish.name}?")
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            // Track the dish consumption
+                            trackViewModel.insertTrackEntry(dish.id, null, 1.0)
+                            showTrackConfirmation = false
+                            selectedRecommendation = null
+                        }
+                    ) {
+                        Text("Track")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showTrackConfirmation = false
+                            selectedRecommendation = null
+                        }
+                    ) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
     }
 }

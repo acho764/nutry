@@ -103,9 +103,9 @@ object FreshnessCalculator {
             return 100
         }
         
-        // Calculate freshness for each relevant ingredient (without excludeSpices override)
+        // Calculate freshness for each relevant ingredient (with excludeSpices parameter)
         val ingredientFreshnesses = relevantIngredients.map { (ingredient, category) ->
-            calculateIngredientFreshness(ingredient, trackEntries, ingredientBasedTimewindow, category, excludeSpices = false)
+            calculateIngredientFreshness(ingredient, trackEntries, ingredientBasedTimewindow, category, excludeSpices)
         }
         
         // Return average freshness of relevant ingredients only

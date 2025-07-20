@@ -5,6 +5,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -43,6 +45,23 @@ fun DishesScreen() {
     
     var showAddDialog by remember { mutableStateOf(false) }
     var editingDish by remember { mutableStateOf<Dish?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
+    var showSearch by remember { mutableStateOf(false) }
+    
+    // Filter dishes based on search query
+    val filteredDishes = remember(dishes, dishIngredients, searchQuery) {
+        if (searchQuery.isBlank()) {
+            dishes
+        } else {
+            dishes.filter { dish ->
+                dish.name.contains(searchQuery, ignoreCase = true) ||
+                dish.emoji.contains(searchQuery, ignoreCase = true) ||
+                (dishIngredients[dish.id] ?: emptyList()).any { ingredient ->
+                    ingredient.name.contains(searchQuery, ignoreCase = true)
+                }
+            }
+        }
+    }
     
     // Force refresh after operations
     LaunchedEffect(dishes.size) {
@@ -61,20 +80,61 @@ fun DishesScreen() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "🍽️ Dishes",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
-            )
-            
-            FloatingActionButton(
-                onClick = { showAddDialog = true },
-                modifier = Modifier.size(48.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add Dish"
+            if (!showSearch) {
+                Text(
+                    text = "🍽️ Dishes",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
                 )
+            } else {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = { Text("Search dishes...") },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search"
+                        )
+                    },
+                    trailingIcon = if (searchQuery.isNotEmpty()) {
+                        {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(
+                                    imageVector = Icons.Default.Clear,
+                                    contentDescription = "Clear"
+                                )
+                            }
+                        }
+                    } else null,
+                    modifier = Modifier.weight(1f),
+                    singleLine = true
+                )
+            }
+            
+            Row {
+                IconButton(
+                    onClick = { 
+                        showSearch = !showSearch
+                        if (!showSearch) searchQuery = ""
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Toggle Search"
+                    )
+                }
+                
+                FloatingActionButton(
+                    onClick = { showAddDialog = true },
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add Dish"
+                    )
+                }
             }
         }
         
@@ -107,14 +167,29 @@ fun DishesScreen() {
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(dishes) { dish ->
-                val dishIngredientsList = dishIngredients[dish.id] ?: emptyList()
-                DishItem(
-                    dish = dish,
-                    ingredients = dishIngredientsList,
-                    onEdit = { editingDish = it },
-                    onDelete = { dishViewModel.deleteDish(it) }
-                )
+            if (filteredDishes.isEmpty() && searchQuery.isNotBlank()) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Text(
+                            text = "No dishes found for \"$searchQuery\"",
+                            modifier = Modifier.padding(16.dp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            } else {
+                items(filteredDishes) { dish ->
+                    val dishIngredientsList = dishIngredients[dish.id] ?: emptyList()
+                    DishItem(
+                        dish = dish,
+                        ingredients = dishIngredientsList,
+                        onEdit = { editingDish = it },
+                        onDelete = { dishViewModel.deleteDish(it) }
+                    )
+                }
             }
         }
     }
