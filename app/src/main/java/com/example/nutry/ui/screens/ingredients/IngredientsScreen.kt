@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.*
@@ -15,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nutry.NutryApplication
 import com.example.nutry.data.entities.Category
@@ -76,6 +78,7 @@ fun IngredientsScreen() {
     var eatingIngredient by remember { mutableStateOf<Ingredient?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     var showSearch by remember { mutableStateOf(false) }
+    var selectedCategory by remember { mutableStateOf<Category?>(null) }
     
     // Filter categories and ingredients based on search query
     val filteredCategories = remember(categories, ingredients, searchQuery) {
@@ -114,60 +117,147 @@ fun IngredientsScreen() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (!showSearch) {
-                Text(
-                    text = "🥬 Ingredients",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
-                )
-            } else {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    placeholder = { Text("Search ingredients...") },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Search"
-                        )
-                    },
-                    trailingIcon = if (searchQuery.isNotEmpty()) {
-                        {
-                            IconButton(onClick = { searchQuery = "" }) {
-                                Icon(
-                                    imageVector = Icons.Default.Clear,
-                                    contentDescription = "Clear"
-                                )
-                            }
+            if (selectedCategory != null) {
+                // Show back button and category name when viewing category ingredients
+                if (!showSearch) {
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(onClick = { selectedCategory = null }) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Back"
+                            )
                         }
-                    } else null,
-                    modifier = Modifier.weight(1f),
-                    singleLine = true
-                )
-            }
-            
-            Row {
-                IconButton(
-                    onClick = { 
-                        showSearch = !showSearch
-                        if (!showSearch) searchQuery = ""
+                        Text(
+                            text = "${selectedCategory!!.emoji} ${selectedCategory!!.name}",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Toggle Search"
+                } else {
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(onClick = { selectedCategory = null }) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            placeholder = { Text("Search ingredients...") },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Search"
+                                )
+                            },
+                            trailingIcon = if (searchQuery.isNotEmpty()) {
+                                {
+                                    IconButton(onClick = { searchQuery = "" }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Clear,
+                                            contentDescription = "Clear"
+                                        )
+                                    }
+                                }
+                            } else null,
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                    }
+                }
+            } else {
+                // Show main header and search when viewing categories
+                if (!showSearch) {
+                    Text(
+                        text = "🥬 Ingredients",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
+                    )
+                } else {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = { Text("Search categories...") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search"
+                            )
+                        },
+                        trailingIcon = if (searchQuery.isNotEmpty()) {
+                            {
+                                IconButton(onClick = { searchQuery = "" }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Clear,
+                                        contentDescription = "Clear"
+                                    )
+                                }
+                            }
+                        } else null,
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        shape = RoundedCornerShape(16.dp)
                     )
                 }
                 
-                FloatingActionButton(
-                    onClick = { showAddChoiceDialog = true },
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add"
-                    )
+                Row {
+                    IconButton(
+                        onClick = { 
+                            showSearch = !showSearch
+                            if (!showSearch) searchQuery = ""
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Toggle Search"
+                        )
+                    }
+                    
+                    FloatingActionButton(
+                        onClick = { showAddChoiceDialog = true },
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add"
+                        )
+                    }
+                }
+            }
+            
+            if (selectedCategory != null) {
+                // Add search and action buttons for ingredient view
+                Row {
+                    IconButton(
+                        onClick = { 
+                            showSearch = !showSearch
+                            if (!showSearch) searchQuery = ""
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Toggle Search"
+                        )
+                    }
+                    
+                    FloatingActionButton(
+                        onClick = { showAddChoiceDialog = true },
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add"
+                        )
+                    }
                 }
             }
         }
@@ -201,42 +291,75 @@ fun IngredientsScreen() {
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            if (filteredCategories.isEmpty() && searchQuery.isNotBlank()) {
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                    ) {
-                        Text(
-                            text = "No ingredients found for \"$searchQuery\"",
-                            modifier = Modifier.padding(16.dp),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            } else {
-                filteredCategories.forEach { category ->
+            if (selectedCategory == null) {
+                // Show categories only
+                if (filteredCategories.isEmpty() && searchQuery.isNotBlank()) {
                     item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        ) {
+                            Text(
+                                text = "No categories found for \"$searchQuery\"",
+                                modifier = Modifier.padding(16.dp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                } else {
+                    items(filteredCategories) { category ->
                         CategoryItem(
                             category = category,
                             onEdit = { editingCategory = it },
                             onDelete = { categoryViewModel.deleteCategory(it) },
-                            onClick = { editingCategory = it }
+                            onClick = { selectedCategory = it }
                         )
                     }
-                    
-                    val categoryIngredients = filteredIngredients.filter { it.categoryId == category.id }
+                }
+            } else {
+                // Show ingredients for selected category
+                val categoryIngredients = ingredients.filter { ingredient ->
+                    ingredient.categoryId == selectedCategory!!.id &&
+                    (searchQuery.isBlank() || ingredient.name.contains(searchQuery, ignoreCase = true))
+                }
+                if (categoryIngredients.isEmpty() && searchQuery.isNotBlank()) {
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        ) {
+                            Text(
+                                text = "No ingredients found for \"$searchQuery\"",
+                                modifier = Modifier.padding(16.dp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                } else if (categoryIngredients.isEmpty()) {
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        ) {
+                            Text(
+                                text = "No ingredients in this category",
+                                modifier = Modifier.padding(16.dp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                } else {
                     items(categoryIngredients) { ingredient ->
                         val freshnessScore = FreshnessCalculator.calculateIngredientFreshness(
                             ingredient, 
                             trackEntries,
                             settings?.ingredientBasedTimewindow ?: 7, 
-                            category, 
+                            selectedCategory!!, 
                             settings?.excludeSpices ?: false
                         )
                         IngredientItem(
                             ingredient = ingredient,
-                            category = category,
+                            category = selectedCategory!!,
                             freshnessScore = freshnessScore,
                             onEdit = { editingIngredient = it },
                             onDelete = { ingredientViewModel.deleteIngredient(it) },

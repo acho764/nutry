@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nutry.NutryApplication
 import com.example.nutry.data.entities.Dish
@@ -109,7 +110,8 @@ fun DishesScreen() {
                         }
                     } else null,
                     modifier = Modifier.weight(1f),
-                    singleLine = true
+                    singleLine = true,
+                    shape = RoundedCornerShape(16.dp)
                 )
             }
             
